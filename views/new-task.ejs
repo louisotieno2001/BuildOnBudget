@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Create New Task - BuildOnBudget</title>
+    <link href="/output.css" rel="stylesheet" />
+    <link href="/toast.css" rel="stylesheet" />
+    <link rel="shortcut icon" href="/images/logo.png" type="image/x-icon">
+    <script defer src="/javascript/index.js"></script>
+</head>
+
+<body class="w-full bg-bg-primary text-text-primary min-h-screen flex flex-col">
+    <div id="toast-container"></div>
+    <div class="w-full bg-bg-primary text-text-primary min-h-screen flex flex-col items-center justify-center">
+        <!-- Main (Centered Form) -->
+        <main class="w-full flex-grow flex items-center justify-center px-4 py-12 min-h-screen">
+            <div class="w-full max-w-2xl bg-bg-primary dark:bg-bg-primary p-8 rounded-lg animate-fadeInUp shadow-md">
+                <h2 class="text-3xl font-extrabold mb-6 text-center text-gradient">Create New Task</h2>
+                <form id="new-task-form" class="space-y-6">
+
+                    <!-- Select Project -->
+                    <div>
+                        <label for="project_id" class="block mb-1 font-medium">Select Project</label>
+                        <select id="project_id" name="project_id" required
+                            class="w-full border border-border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent">
+                            <option value="">-- Select Project --</option>
+                            <% projects.forEach(project => { %>
+                                <option value="<%= project.id %>"><%= project.name %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+
+                    <!-- Task Name -->
+                    <div>
+                        <label for="name" class="block mb-1 font-medium">Task Name</label>
+                        <input type="text" id="name" name="name" required
+                            class="w-full border border-border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
+                            placeholder="e.g., Foundation Excavation" />
+                    </div>
+
+                    <!-- Task Description -->
+                    <div>
+                        <label for="description" class="block mb-1 font-medium">Task Description</label>
+                        <textarea id="description" name="description" rows="3"
+                            class="w-full border border-border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
+                            placeholder="Detailed description of the task..."></textarea>
+                    </div>
+
+                    <!-- Assigned To -->
+                    <div>
+                        <label for="assigned_to" class="block mb-1 font-medium">Assigned To</label>
+                        <input type="text" id="assigned_to" name="assigned_to"
+                            class="w-full border border-border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
+                            placeholder="Name or team member" />
+                    </div>
+
+                    <!-- Priority -->
+                    <div>
+                        <label for="priority" class="block mb-1 font-medium">Priority</label>
+                        <select id="priority" name="priority"
+                            class="w-full border border-border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+
+                    <!-- Status -->
+                    <div>
+                        <label for="status" class="block mb-1 font-medium">Status</label>
+                        <select id="status" name="status"
+                            class="w-full border border-border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent">
+                            <option value="pending" selected>Pending</option>
+                            <option value="in_progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+
+                    <!-- Timeline -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="start_date" class="block mb-1 font-medium">Start Date</label>
+                            <input type="date" id="start_date" name="start_date"
+                                class="w-full border border-border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent" />
+                        </div>
+                        <div>
+                            <label for="end_date" class="block mb-1 font-medium">End Date</label>
+                            <input type="date" id="end_date" name="end_date"
+                                class="w-full border border-border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent" />
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" id="create-task-button"
+                        class="w-full bg-accent text-text-primary py-2 rounded-md font-semibold hover:bg-accent/90 transition cursor-pointer">
+                        Add Task
+                    </button>
+                </form>
+
+                <!-- Back link -->
+                <p class="mt-6 text-center text-sm text-gray-500">
+                    <a href="/dashboard" class="text-accent font-medium hover:underline">Back to Dashboard</a>
+                </p>
+            </div>
+        </main>
+    </div>
+    <!-- Footer -->
+    <footer class="bg-bg-secondary text-text-secondary text-center py-4 mt-auto border-t border-border">
+        &copy; <%= new Date().getFullYear() %> BuildOnBudget. All rights reserved.
+    </footer>
+    <script src="/javascript/toast.js"></script>
+    <script src="/javascript/new-task.js"></script>
+</body>
+
+</html>

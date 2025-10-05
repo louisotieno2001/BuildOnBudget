@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OTP Verification - BuildOnBudget</title>
+  <link rel="shortcut icon" href="/images/logo.png" type="image/x-icon">
+  <link href="/output.css" rel="stylesheet" />
+  <script defer src="/javascript/index.js"></script>
+</head>
+<body class="bg-bg-primary text-text-primary min-h-screen flex flex-col">
+  <main class="flex-grow container mx-auto px-4 py-12 max-w-md">
+    <div class="card animate-fadeInUp">
+      <h2 class="text-3xl font-extrabold mb-6 text-center text-gradient">Verify your account</h2>
+      <p class="text-text-secondary text-center mb-8">
+        We've sent a 6-digit code to your email. Please enter it below to verify your account.
+      </p>
+      <form id="otp-form" class="space-y-6" method="POST" action="/otp">
+        <div>
+          <label for="otp" class="block mb-1 font-medium">OTP Code</label>
+          <input type="text" id="otp" name="otp" required class="input-field text-center text-2xl tracking-widest" placeholder="000000" maxlength="6" pattern="[0-9]{6}" />
+        </div>
+        <button type="submit" class="btn-primary w-full">Verify</button>
+      </form>
+      <div class="text-center mt-4">
+        <button id="resend-otp" class="text-accent hover:text-accent-hover text-sm transition-colors">Didn't receive the code? Resend</button>
+      </div>
+    </div>
+  </main>
+
+  <footer class="bg-bg-secondary text-text-secondary text-center py-4 mt-auto border-t border-border">
+    &copy;  BuildOnBudget. All rights reserved.
+  </footer>
+</body>
+</html>

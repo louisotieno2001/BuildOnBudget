@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Project Details - BuildOnBudget</title>
+  <link href="/output.css" rel="stylesheet" />
+  <link rel="shortcut icon" href="/images/logo.png" type="image/x-icon">
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script defer src="/javascript/index.js"></script>
+</head>
+
+<body x-data="{ sidebarOpen: false, profileOpen: false }"
+  class="bg-bg-primary text-text-primary min-h-screen flex flex-col">
+
+  <!-- HEADER -->
+  <header class="bg-bg-primary text-text-primary border-b p-4 flex justify-between items-center z-30 sticky top-0">
+    <div class="flex items-center">
+      <!-- Mobile menu button -->
+      <button @click="sidebarOpen = !sidebarOpen" class="text-text-primary focus:outline-none md:hidden">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+        </svg>
+      </button>
+      <h1 class="text-2xl font-bold ml-4 text-purple-700">BuildOnBudget</h1>
+    </div>
+    <nav class="hidden md:flex space-x-6">
+      <a href="/" class="text-text-primary hover:text-purple-600">Home</a>
+      <a href="/dashboard" class="text-text-primary hover:text-purple-600">Dashboard</a>
+      <a href="/logout" class="text-text-primary hover:text-purple-600">Logout</a>
+    </nav>
+  </header>
+
+  <div class="flex flex-1">
+    <!-- MOBILE OVERLAY -->
+    <div x-show="sidebarOpen" @click="sidebarOpen = false" class="w-xl fixed inset-0 bg-black/30 md:hidden z-0"></div>
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 ml-0 md:ml-80 p-4 md:p-8 transition-all">
+      <div class="bg-bg-primary p-4 md:p-6 rounded-xl shadow">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 md:mb-6 gap-4">
+          <h2 class="text-2xl md:text-3xl font-extrabold text-purple-700"><%= project.name %></h2>
+          <a href="/dashboard" class="bg-purple-600 text-white px-3 md:px-4 py-2 rounded-lg hover:bg-purple-700 transition text-sm md:text-base flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            Back to Dashboard
+          </a>
+        </div>
+        <div class="space-y-4 md:space-y-6">
+          <div>
+            <h3 class="text-lg md:text-xl font-semibold mb-2">Description</h3>
+            <p class="text-text-secondary text-sm md:text-base"><%= project.description %></p>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            <div class="bg-bg-secondary p-4 rounded-lg shadow-sm">
+              <h3 class="text-lg md:text-xl font-semibold mb-2">Budget</h3>
+              <p class="text-text-secondary text-sm md:text-base">$<%= project.budget %></p>
+            </div>
+            <div class="bg-bg-secondary p-4 rounded-lg shadow-sm">
+              <h3 class="text-lg md:text-xl font-semibold mb-2">Start Date</h3>
+              <p class="text-text-secondary text-sm md:text-base"><%= new Date(project.start_date).toLocaleDateString() %></p>
+            </div>
+            <% if (project.deadline) { %>
+            <div class="bg-bg-secondary p-4 rounded-lg shadow-sm">
+              <h3 class="text-lg md:text-xl font-semibold mb-2">End Date</h3>
+              <p class="text-text-secondary text-sm md:text-base"><%= new Date(project.deadline).toLocaleDateString() %></p>
+            </div>
+            <% } %>
+          </div>
+          <!-- Add more project details as needed -->
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="bg-bg-secondary text-text-secondary text-center py-4 mt-auto border-t border-border">
+    &copy; <%= new Date().getFullYear() %> BuildOnBudget. All rights reserved.
+  </footer>
+</body>
+
+</html>

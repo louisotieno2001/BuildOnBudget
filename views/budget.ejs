@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Budget Setup - BuildOnBudget</title>
+    <link href="/output.css" rel="stylesheet" />
+    <link href="/toast.css" rel="stylesheet" />
+    <link rel="shortcut icon" href="/images/logo.png" type="image/x-icon">
+    <script defer src="/javascript/index.js"></script>
+</head>
+
+<body class="w-full bg-bg-primary text-text-primary min-h-screen flex flex-col">
+    <div id="toast-container"></div>
+    <div class="w-full bg-bg-primary text-text-primary min-h-screen flex flex-col items-center justify-center">
+        <!-- Main (Centered Form) -->
+        <main class="w-full flex-grow flex items-center justify-center px-4 py-12 min-h-screen">
+            <div class="w-full max-w-4xl bg-bg-primary dark:bg-bg-primary p-8 rounded-lg animate-fadeInUp shadow-md">
+                <h2 class="text-3xl font-extrabold mb-6 text-center text-gradient">Setup Project Budget</h2>
+                <form id="budget-form" class="space-y-6">
+
+                    <!-- Select Project -->
+                    <div>
+                        <label for="project_id" class="block mb-1 font-medium">Select Project</label>
+                        <select id="project_id" name="project_id" required
+                            class="w-full border border-border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent">
+                            <option value="">-- Select Project --</option>
+                            <% projects.forEach(project => { %>
+                                <option value="<%= project.id %>"><%= project.name %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+
+                    <!-- Total Budget -->
+                    <div>
+                        <label for="total_budget" class="block mb-1 font-medium">Total Budget ($)</label>
+                        <input type="number" id="total_budget" name="total_budget" required min="0" step="0.01"
+                            class="w-full border border-border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
+                            placeholder="Enter total budget" />
+                    </div>
+
+                    <!-- Budget Components -->
+                    <div>
+                        <label class="block mb-1 font-medium">Budget Breakdown</label>
+                        <p class="text-sm text-text-secondary mb-4">Break down the budget into components. Ensure the total of components equals the total budget.</p>
+                        <div id="components-container" class="space-y-4">
+                            <!-- Components will be added here -->
+                        </div>
+                        <button type="button" id="add-component" class="mt-4 bg-accent text-white px-4 py-2 rounded-md hover:bg-accent/90 transition">
+                            + Add Component
+                        </button>
+                    </div>
+
+                    <!-- Total Check -->
+                    <div class="bg-bg-secondary p-4 rounded-md">
+                        <p class="text-sm">Total Allocated: $<span id="allocated-total">0.00</span></p>
+                        <p class="text-sm">Remaining: $<span id="remaining">0.00</span></p>
+                        <p id="balance-message" class="text-sm mt-2"></p>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" id="save-budget-button"
+                        class="w-full bg-accent text-text-primary py-2 rounded-md font-semibold hover:bg-accent/90 transition cursor-pointer">
+                        Save Budget
+                    </button>
+                </form>
+
+                <!-- Back link -->
+                <p class="mt-6 text-center text-sm text-gray-500">
+                    <a href="/dashboard" class="text-accent font-medium hover:underline">Back to Dashboard</a>
+                </p>
+            </div>
+        </main>
+    </div>
+    <!-- Footer -->
+    <footer class="bg-bg-secondary text-text-secondary text-center py-4 mt-auto border-t border-border">
+        &copy; <%= new Date().getFullYear() %> BuildOnBudget. All rights reserved.
+    </footer>
+    <script src="/javascript/toast.js"></script>
+    <script>
+        let componentCount = 0;
+
+        document.getElementById('add-component').addEventListener('click', function() {
+            componentCount++;
+            const container = document.getElementById('components-container');
+            const componentDiv = document.createElement('div');
+            componentDiv.className = 'component-item flex space-x-4 items-end';
+            componentDiv.innerHTML = `
+                <div class="flex-1">
+                    <label class="block mb-1 text-sm font-medium">Component Name</label>
+                    <input type="text" name="component_name_${componentCount}" required
+                        class="w-full border border-border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
+                        placeholder="e.g., Materials" />
+                </div>
+                <div class="w-32">
+                    <label class="block mb-1 text-sm font-medium">Cost ($)</label>
+                    <input type="number" name="component_cost_${componentCount}" required min="0" step="0.01"
+                        class="w-full border border-border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent component-cost"
+                        placeholder="0.00" />
+                </div>
+                <button type="button" class="remove-component bg-red-500 text-white px-3 py-2 rounded-md hover:bg-red-600 transition">
+                    Remove
+                </button>
+            `;
+            container.appendChild(componentDiv);
+            updateTotals();
+        });
+
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-component')) {
+                e.target.parentElement.remove();
+                updateTotals();
+            }
+        });
+
+        document.addEventListener('input', function(e) {
+            if (e.target.classList.contains('component-cost')) {
+                updateTotals();
+            }
+        });
+
+        document.getElementById('total_budget').addEventListener('input', updateTotals);
+
+        function updateTotals() {
+            const totalBudget = parseFloat(document.getElementById('total_budget').value) || 0;
+            const costInputs = document.querySelectorAll('.component-cost');
+            let allocated = 0;
+            costInputs.forEach(input => {
+                allocated += parseFloat(input.value) || 0;
+            });
+            const remaining = totalBudget - allocated;
+
+            document.getElementById('allocated-total').textContent = allocated.toFixed(2);
+            document.getElementById('remaining').textContent = remaining.toFixed(2);
+
+            const messageEl = document.getElementById('balance-message');
+            if (remaining === 0) {
+                messageEl.textContent = 'Budget perfectly allocated!';
+                messageEl.className = 'text-sm mt-2 text-green-600';
+            } else if (remaining > 0) {
+                messageEl.textContent = `$${remaining.toFixed(2)} remaining to allocate.`;
+                messageEl.className = 'text-sm mt-2 text-yellow-600';
+            } else {
+                messageEl.textContent = `Overallocated by $${Math.abs(remaining).toFixed(2)}.`;
+                messageEl.className = 'text-sm mt-2 text-red-600';
+            }
+        }
+
+        document.getElementById('budget-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+
+            const projectId = data.project_id;
+            const totalBudget = parseFloat(data.total_budget);
+            const components = [];
+
+            for (let key in data) {
+                if (key.startsWith('component_name_')) {
+                    const index = key.split('_')[2];
+                    const name = data[key];
+                    const cost = parseFloat(data[`component_cost_${index}`]);
+                    if (name && cost) {
+                        components.push({ name, cost });
+                    }
+                }
+            }
+
+            const allocated = components.reduce((sum, comp) => sum + comp.cost, 0);
+            if (Math.abs(allocated - totalBudget) > 0.01) {
+                showToast('Component costs must equal the total budget.', 'error');
+                return;
+            }
+
+            const button = document.getElementById('save-budget-button');
+            button.disabled = true;
+            button.textContent = 'Saving...';
+
+            try {
+                const response = await fetch('/budget', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ projectId, totalBudget, components })
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    showToast('Budget saved successfully', 'success');
+                    setTimeout(() => window.location.href = '/dashboard', 1000);
+                } else {
+                    showToast(result.error || 'Error saving budget', 'error');
+                    button.disabled = false;
+                    button.textContent = 'Save Budget';
+                }
+            } catch (error) {
+                console.error('Error saving budget:', error);
+                showToast('An error occurred', 'error');
+                button.disabled = false;
+                button.textContent = 'Save Budget';
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,169 @@
+@import "tailwindcss/preflight";
+@import "tailwindcss/theme";
+@import "tailwindcss/utilities";
+
+/* Custom styles */
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Theme variables */
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-card: #474040;
+  --bg-opaque: #ffffff;
+  --text-primary: #1e293b;
+  --text-secondary: #0e0f0f;
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
+  --border: #e2e8f0;
+  --gradient-start: #3b82f6;
+  --gradient-end: #2563eb;
+}
+
+/* Dark theme */
+.dark {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-card: #474040;
+  --bg-opaque: #1e293b;
+  --text-primary: #f1f5f9;
+  --text-secondary: #152e52;
+  --accent: #60a5fa;
+  --accent-hover: #3b82f6;
+  --border: #334155;
+  --gradient-start: #60a5fa;
+  --gradient-end: #3b82f6;
+}
+
+/* Opaque background for theme toggling */
+.opaque-bg {
+  background-color: var(--bg-opaque) !important;
+}
+
+/* Custom components */
+.btn-primary {
+  @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 shadow-md;
+  background-image: linear-gradient(45deg, var(--gradient-start), var(--gradient-end));
+  box-shadow: 0 4px 15px var(--accent);
+  transition: background-image 0.3s ease, box-shadow 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-image: linear-gradient(45deg, var(--gradient-end), var(--gradient-start));
+  box-shadow: 0 6px 20px var(--accent-hover);
+}
+
+.btn-secondary {
+  @apply bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.dark .btn-secondary {
+  @apply bg-gray-700 hover:bg-gray-600 text-gray-200;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.input-field {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+  transition: box-shadow 0.3s ease;
+}
+
+.input-field:focus {
+  box-shadow: 0 0 8px var(--accent);
+}
+
+.dark .input-field {
+  @apply bg-gray-700 border-gray-600 text-white placeholder-gray-400;
+}
+
+/* Card style */
+.card {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  transform: translateY(-4px);
+}
+
+/* Section backgrounds */
+.section-gradient {
+  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+  color: white;
+  padding: 3rem 1rem;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+  margin-bottom: 2rem;
+}
+
+/* Heading animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+/* Theme toggle button */
+.theme-toggle {
+  background: none;
+  border: 2px solid var(--accent);
+  color: var(--accent);
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  user-select: none;
+}
+
+.theme-toggle:hover {
+  background-color: var(--accent);
+  color: white;
+  border-color: var(--accent-hover);
+}
+
+/* Utility for spacing */
+.mb-10 {
+  margin-bottom: 2.5rem;
+}
+
+.mt-10 {
+  margin-top: 2.5rem;
+}
+
+.text-gradient {
+  background: linear-gradient(45deg, var(--gradient-start), var(--gradient-end));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Footer style */
+footer {
+  font-size: 0.875rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--text-primary);
+  background-color: var(--bg-secondary);
+  border-top: 0px solid var(--border);
+  padding: 1rem 0;
+  user-select: none;
+}

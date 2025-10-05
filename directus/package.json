@@ -1,0 +1,15 @@
+{
+  "name": "directus",
+  "version": "1.0.0",
+  "description": "bob's directus",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "node"
+  },
+  "dependencies": {
+    "pg": "^8.16.3"
+  }
+}
