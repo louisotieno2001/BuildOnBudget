@@ -27,18 +27,27 @@ router.get('/', async (req, res) => {
         return res.redirect('/login');
     }
     try {
-        const cart = req.session.cart || [];
-        // Fetch item details for cart items
-        const itemIds = cart.map(c => c.item_id);
-        if (itemIds.length === 0) {
+        // console.log('User ID:', req.session.user.id);
+        // Fetch pending orders for the user
+        const resOrders = await query(`/items/orders?filter[user_id]=${req.session.user.id}&filter[status]=pending&fields=id,user_id,product_id,status,units`);
+        // console.log('Response status:', resOrders.status);
+        const orders = await resOrders.json();
+        // console.log('Orders response:', orders);
+        // console.log('Fetched orders:', orders.data);
+        if (!orders.data || orders.data.length === 0) {
             return res.render('cart', { user: req.session.user, cartItems: [] });
         }
+        // Fetch item details for the products in orders
+        const itemIds = orders.data.map(o => o.product_id);
         const resItems = await query(`/items/shop?filter[id][_in]=${itemIds.join(',')}`);
         const items = await resItems.json();
-        const cartItems = cart.map(c => {
-            const item = items.data.find(i => i.id == c.item_id);
-            return { ...item, quantity: c.quantity, total: item.price * c.quantity };
-        });
+        const cartItems = orders.data.map(o => {
+            const item = items.data.find(i => i.id == o.product_id);
+            if (!item) return null; // Skip if item not found
+            const price = parseFloat(item.price);
+            const qty = parseInt(o.units);
+            return { ...item, quantity: qty, total: price * qty, order_id: o.id };
+        }).filter(Boolean);
         res.render('cart', { user: req.session.user, cartItems });
     } catch (error) {
         console.error('Error fetching cart items:', error);
@@ -47,58 +56,67 @@ router.get('/', async (req, res) => {
 });
 
 // Update cart quantity
-router.post('/update', (req, res) => {
+router.post('/update', async (req, res) => {
     if (!req.session.user) {
         return res.status(401).json({ error: 'Not logged in' });
     }
-    const { item_id, quantity } = req.body;
-    if (!req.session.cart) req.session.cart = [];
-    const item = req.session.cart.find(i => i.item_id == item_id);
-    if (item) {
-        item.quantity = parseInt(quantity);
-        if (item.quantity <= 0) {
-            req.session.cart = req.session.cart.filter(i => i.item_id != item_id);
+    const { order_id, quantity } = req.body;
+    try {
+        const newQuantity = parseInt(quantity);
+        if (newQuantity <= 0) {
+            // Delete the order
+            await query(`/items/orders/${order_id}`, {
+                method: 'DELETE'
+            });
+        } else {
+            // Update the order quantity
+            await query(`/items/orders/${order_id}`, {
+                method: 'PATCH',
+                body: JSON.stringify({ units: newQuantity })
+            });
         }
+        res.json({ message: 'Cart updated' });
+    } catch (error) {
+        console.error('Error updating cart:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
-    res.json({ message: 'Cart updated' });
 });
 
-// Checkout - create order
+// Checkout - update orders to complete
 router.post('/checkout', async (req, res) => {
     if (!req.session.user) {
         return res.status(401).json({ error: 'Not logged in' });
     }
     try {
-        const cart = req.session.cart || [];
-        if (cart.length === 0) {
+        // Fetch pending orders for the user
+        const resOrders = await query(`/items/orders?filter[user_id]=${req.session.user.id}&filter[status]=pending&fields=id,user_id,product_id,status,units`);
+        const orders = await resOrders.json();
+        // console.log('Checkout orders:', orders.data);
+        if (!orders.data || orders.data.length === 0) {
             return res.status(400).json({ error: 'Cart is empty' });
         }
         // Fetch item details
-        const itemIds = cart.map(c => c.item_id);
+        const itemIds = orders.data.map(o => o.product_id);
         const resItems = await query(`/items/shop?filter[id][_in]=${itemIds.join(',')}`);
         const items = await resItems.json();
-        const orderItems = cart.map(c => {
-            const item = items.data.find(i => i.id == c.item_id);
-            return { item_id: c.item_id, name: item.name, quantity: c.quantity, price: item.price };
-        });
-        const total = orderItems.reduce((sum, oi) => sum + oi.price * oi.quantity, 0);
-        // Create order in orders collection
-        const orderData = {
-            user_id: req.session.user.id,
-            items: orderItems,
-            total,
-            status: 'pending'
-        };
-        const resOrder = await query('/items/orders', {
-            method: 'POST',
-            body: JSON.stringify(orderData)
-        });
-        if (resOrder.ok) {
-            req.session.cart = []; // Clear cart
-            res.json({ message: 'Order placed successfully' });
-        } else {
-            res.status(500).json({ error: 'Failed to place order' });
+        
+        // Update each order to complete
+        for (const order of orders.data) {
+            const item = items.data.find(i => i.id == order.product_id);
+            const amount_paid = parseFloat(item.price) * parseInt(order.units);
+            const payment_message = `paid by ${req.session.user.name}`;
+            // console.log('Updating order:', order.id, 'amount_paid:', amount_paid, 'units:', order.units, 'payment_message:', payment_message);
+            await query(`/items/orders/${order.id}`, {
+                method: 'PATCH',
+                body: JSON.stringify({
+                    status: 'complete',
+                    amount_paid,
+                    units: parseInt(order.units),
+                    payment_message
+                })
+            });
         }
+        res.json({ message: 'Order placed successfully' });
     } catch (error) {
         console.error('Error during checkout:', error);
         res.status(500).json({ error: 'Internal server error' });

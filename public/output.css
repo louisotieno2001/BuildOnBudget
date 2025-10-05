@@ -168,6 +168,7 @@ button, input:where([type='button'], [type='reset'], [type='submit']), ::file-se
   --color-red-600: oklch(57.7% 0.245 27.325);
   --color-red-700: oklch(50.5% 0.213 27.518);
   --color-yellow-50: oklch(98.7% 0.026 102.212);
+  --color-yellow-400: oklch(85.2% 0.199 91.936);
   --color-yellow-500: oklch(79.5% 0.184 86.047);
   --color-yellow-600: oklch(68.1% 0.162 75.834);
   --color-green-500: oklch(72.3% 0.219 149.579);
@@ -179,6 +180,7 @@ button, input:where([type='button'], [type='reset'], [type='submit']), ::file-se
   --color-purple-50: oklch(97.7% 0.014 308.299);
   --color-purple-600: oklch(55.8% 0.288 302.321);
   --color-purple-700: oklch(49.6% 0.265 301.924);
+  --color-purple-900: oklch(38.1% 0.176 304.987);
   --color-gray-100: oklch(96.7% 0.003 264.542);
   --color-gray-200: oklch(92.8% 0.006 264.531);
   --color-gray-300: oklch(87.2% 0.01 258.338);
@@ -194,6 +196,8 @@ button, input:where([type='button'], [type='reset'], [type='submit']), ::file-se
   --container-xl: 36rem;
   --container-2xl: 42rem;
   --container-4xl: 56rem;
+  --text-xs: 0.75rem;
+  --text-xs--line-height: calc(1 / 0.75);
   --text-sm: 0.875rem;
   --text-sm--line-height: calc(1.25 / 0.875);
   --text-base: 1rem;
@@ -246,6 +250,9 @@ button, input:where([type='button'], [type='reset'], [type='submit']), ::file-se
 .inset-y-0 {
   inset-block: calc(var(--spacing) * 0);
 }
+.-top-2 {
+  top: calc(var(--spacing) * -2);
+}
 .top-0 {
   top: calc(var(--spacing) * 0);
 }
@@ -254,6 +261,9 @@ button, input:where([type='button'], [type='reset'], [type='submit']), ::file-se
 }
 .top-4 {
   top: calc(var(--spacing) * 4);
+}
+.-right-2 {
+  right: calc(var(--spacing) * -2);
 }
 .right-4 {
   right: calc(var(--spacing) * 4);
@@ -413,6 +423,9 @@ button, input:where([type='button'], [type='reset'], [type='submit']), ::file-se
 }
 .h-24 {
   height: calc(var(--spacing) * 24);
+}
+.h-32 {
+  height: calc(var(--spacing) * 32);
 }
 .h-\[500px\] {
   height: 500px;
@@ -688,6 +701,10 @@ button, input:where([type='button'], [type='reset'], [type='submit']), ::file-se
   border-top-style: var(--tw-border-style);
   border-top-width: 1px;
 }
+.border-r {
+  border-right-style: var(--tw-border-style);
+  border-right-width: 1px;
+}
 .border-b {
   border-bottom-style: var(--tw-border-style);
   border-bottom-width: 1px;
@@ -722,9 +739,6 @@ button, input:where([type='button'], [type='reset'], [type='submit']), ::file-se
 .bg-blue-500 {
   background-color: var(--color-blue-500);
 }
-.bg-gray-100 {
-  background-color: var(--color-gray-100);
-}
 .bg-gray-200 {
   background-color: var(--color-gray-200);
 }
@@ -751,6 +765,9 @@ button, input:where([type='button'], [type='reset'], [type='submit']), ::file-se
 }
 .bg-yellow-50 {
   background-color: var(--color-yellow-50);
+}
+.bg-yellow-400 {
+  background-color: var(--color-yellow-400);
 }
 .bg-yellow-500 {
   background-color: var(--color-yellow-500);
@@ -789,6 +806,9 @@ button, input:where([type='button'], [type='reset'], [type='submit']), ::file-se
 }
 .p-8 {
   padding: calc(var(--spacing) * 8);
+}
+.px-2 {
+  padding-inline: calc(var(--spacing) * 2);
 }
 .px-3 {
   padding-inline: calc(var(--spacing) * 3);
@@ -869,6 +889,10 @@ button, input:where([type='button'], [type='reset'], [type='submit']), ::file-se
   font-size: var(--text-xl);
   line-height: var(--tw-leading, var(--text-xl--line-height));
 }
+.text-xs {
+  font-size: var(--text-xs);
+  line-height: var(--tw-leading, var(--text-xs--line-height));
+}
 .leading-tight {
   --tw-leading: var(--leading-tight);
   line-height: var(--leading-tight);
@@ -917,6 +941,9 @@ button, input:where([type='button'], [type='reset'], [type='submit']), ::file-se
 .text-purple-700 {
   color: var(--color-purple-700);
 }
+.text-purple-900 {
+  color: var(--color-purple-900);
+}
 .text-red-500 {
   color: var(--color-red-500);
 }
@@ -958,12 +985,11 @@ button, input:where([type='button'], [type='reset'], [type='submit']), ::file-se
   --tw-shadow: 0 1px 3px 0 var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 1px 2px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
   box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
 }
-.shadow-xl {
-  --tw-shadow: 0 20px 25px -5px var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 8px 10px -6px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
-  box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
-}
 .blur {
   --tw-blur: blur(8px);
+  filter: var(--tw-blur,) var(--tw-brightness,) var(--tw-contrast,) var(--tw-grayscale,) var(--tw-hue-rotate,) var(--tw-invert,) var(--tw-saturate,) var(--tw-sepia,) var(--tw-drop-shadow,);
+}
+.filter {
   filter: var(--tw-blur,) var(--tw-brightness,) var(--tw-contrast,) var(--tw-grayscale,) var(--tw-hue-rotate,) var(--tw-invert,) var(--tw-saturate,) var(--tw-sepia,) var(--tw-drop-shadow,);
 }
 .transition {
@@ -1142,6 +1168,11 @@ button, input:where([type='button'], [type='reset'], [type='submit']), ::file-se
     position: static;
   }
 }
+.md\:mb-0 {
+  @media (width >= 48rem) {
+    margin-bottom: calc(var(--spacing) * 0);
+  }
+}
 .md\:mb-6 {
   @media (width >= 48rem) {
     margin-bottom: calc(var(--spacing) * 6);
@@ -1181,6 +1212,21 @@ button, input:where([type='button'], [type='reset'], [type='submit']), ::file-se
 .md\:grid-cols-3 {
   @media (width >= 48rem) {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.md\:flex-row {
+  @media (width >= 48rem) {
+    flex-direction: row;
+  }
+}
+.md\:items-center {
+  @media (width >= 48rem) {
+    align-items: center;
+  }
+}
+.md\:justify-between {
+  @media (width >= 48rem) {
+    justify-content: space-between;
   }
 }
 .md\:gap-6 {
@@ -1259,6 +1305,11 @@ button, input:where([type='button'], [type='reset'], [type='submit']), ::file-se
   @media (width >= 64rem) {
     font-size: var(--text-6xl);
     line-height: var(--tw-leading, var(--text-6xl--line-height));
+  }
+}
+.xl\:grid-cols-4 {
+  @media (width >= 80rem) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 .dark\:bg-gray-700 {

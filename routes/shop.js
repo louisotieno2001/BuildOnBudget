@@ -27,10 +27,13 @@ router.get('/', async (req, res) => {
         return res.redirect('/login');
     }
     try {
-        const resItems = await query('/items/shop?fields=*,media.*');
+        const resItems = await query('/items/products?fields=*,media.*');
         const items = await resItems.json();
-        console.log(items)
-        res.render('shop', { user: req.session.user, items: items.data || [], cartCount: (req.session.cart || []).length });
+        // Fetch cart count (pending orders)
+        const resOrders = await query(`/items/orders?filter[user_id][_eq]=${req.session.user.id}&filter[status][_eq]=pending`);
+        const orders = await resOrders.json();
+        const cartCount = orders.data ? orders.data.length : 0;
+        res.render('shop', { user: req.session.user, items: items.data || [], cartCount });
     } catch (error) {
         console.error('Error fetching shop items:', error);
         res.render('shop', { user: req.session.user, items: [] });
@@ -38,19 +41,32 @@ router.get('/', async (req, res) => {
 });
 
 // Add to cart
-router.post('/add-to-cart', (req, res) => {
+router.post('/add-to-cart', async (req, res) => {
     if (!req.session.user) {
         return res.status(401).json({ error: 'Not logged in' });
     }
     const { item_id, quantity } = req.body;
-    if (!req.session.cart) req.session.cart = [];
-    const existing = req.session.cart.find(i => i.item_id == item_id);
-    if (existing) {
-        existing.quantity += parseInt(quantity);
-    } else {
-        req.session.cart.push({ item_id, quantity: parseInt(quantity) });
+    try {
+        // Insert into orders collection with status pending
+        const orderData = {
+            user_id: req.session.user.id,
+            product_id: item_id,
+            status: 'pending',
+            units: parseInt(quantity)
+        };
+        const resOrder = await query('/items/orders', {
+            method: 'POST',
+            body: JSON.stringify(orderData)
+        });
+        if (resOrder.ok) {
+            res.json({ message: 'Added to cart' });
+        } else {
+            res.status(500).json({ error: 'Failed to add to cart' });
+        }
+    } catch (error) {
+        console.error('Error adding to cart:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
-    res.json({ message: 'Added to cart' });
 });
 
 module.exports = router;

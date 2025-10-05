@@ -234,4 +234,42 @@ router.get('/:id', async (req, res) => {
     res.render('project_details', { user: req.session.user, project: project });
 });
 
+// Orders route
+router.get('/orders', async (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ error: 'Not logged in' });
+  }
+  try {
+    const status = req.query.status || 'pending';
+    let filter;
+    if (status.includes(',')) {
+      const statuses = status.split(',');
+      filter = `filter[status][_in]=${statuses.join(',')}`;
+    } else {
+      filter = `filter[status]=${status}`;
+    }
+    const resOrders = await query(`/items/orders?filter[user_id]=${req.session.user.id}&${filter}&fields=id,user_id,product_id,status,units,amount_paid`);
+    const orders = await resOrders.json();
+    if (!orders.data) {
+      return res.json([]);
+    }
+    // Fetch product names
+    const productIds = orders.data.map(o => o.product_id);
+    const resProducts = await query(`/items/shop?filter[id][_in]=${productIds.join(',')}&fields=id,name`);
+    const products = await resProducts.json();
+    const productMap = {};
+    if (products.data) {
+      products.data.forEach(p => productMap[p.id] = p.name);
+    }
+    const ordersWithNames = orders.data.map(o => ({
+      ...o,
+      product_name: productMap[o.product_id] || 'Unknown'
+    }));
+    res.json(ordersWithNames);
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;
