@@ -93,6 +93,9 @@ document.addEventListener('DOMContentLoaded', function() {
   // Attach listeners initially
   attachAddToCartListeners();
 
+  // Debug image src
+  const firstImg = document.querySelector('#items-grid img');
+
   // Sidebar toggle
   const sidebarToggle = document.getElementById('sidebar-toggle');
   const sidebar = document.getElementById('sidebar');

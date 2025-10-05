@@ -17,14 +17,14 @@
   <div id="toast-container"></div>
 
   <!-- HEADER -->
-  <header class="bg-bg-secondary shadow-md sticky top-0 z-50">
+  <header class="sidebar-bg shadow-md sticky top-0 z-50">
     <div class="flex justify-between items-center px-4 py-3 md:px-8">
       <!-- Left: Menu + Brand -->
       <div class="flex items-center space-x-4">
         <button id="sidebar-toggle" class="md:hidden text-text-primary">
            <i class="fas fa-bars text-xl"></i>
         </button>
-        <div class="flex items-center space-x-2">
+        <div class="hidden md:flex items-center space-x-2">
           <img src="/images/logo.png" alt="Logo" class="w-8 h-8">
           <span class="text-lg font-bold text-purple-600">BuildOnBudget</span>
         </div>
@@ -63,7 +63,7 @@
 
     <!-- SIDEBAR -->
     <aside id="sidebar"
-      class="fixed md:static inset-y-0 left-0 w-72 bg-bg-secondary border-r border-bg-secondary z-50 transform transition-transform duration-300 md:translate-x-0 cursor-pointer">
+      class="fixed md:static inset-y-0 left-0 w-72 sidebar-bg border-r border-bg-secondary z-50 transform transition-transform duration-300 -translate-x-full md:translate-x-0 cursor-pointer">
         
       <div class="flex flex-col h-full">
        <!-- Sidebar Title -->
@@ -116,7 +116,7 @@
         <div id="items-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           <% items.forEach(item => { %>
             <div class="bg-bg-secondary rounded-xl p-4 shadow hover:shadow-lg transition flex flex-col" data-name="<%= item.name %>" data-description="<%= item.description || '' %>" data-category="<%= item.category || '' %>" data-subcategory="<%= item.sub_category || '' %>">
-              <img src="<%= item.media ? item.media.url : '/images/logo.png' %>" alt="<%= item.name %>" class="w-full h-32 object-cover rounded mb-2">
+              <img src="<%= item.media ? `/directus/assets/${item.media.id}?access_token=${directusToken}` : '/images/logo.png' %>" alt="<%= item.name %>" class="w-full h-32 object-cover rounded mb-2">
               <h4 class="text-lg font-semibold mb-1"><%= item.name %></h4>
               <p class="text-text-secondary text-sm mb-2 line-clamp-2 flex-grow"><%= item.description || 'High-quality construction material' %></p>
               <p class="text-lg font-bold text-accent mb-2">$<%= parseFloat(item.price).toFixed(2) %></p>

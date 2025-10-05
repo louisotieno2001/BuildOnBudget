@@ -181,6 +181,56 @@ router.get('/', async (req, res) => {
         shopItems = [];
     }
 
+    // Fetch ongoing orders (status complete)
+    let ongoingOrders = [];
+    try {
+        const resOngoing = await query(`/items/orders?filter[user_id][_eq]=${userId}&filter[status][_eq]=complete&fields=id,user_id,product_id,status,units,amount_paid`);
+        const ongoingData = await resOngoing.json();
+        ongoingOrders = ongoingData.data || [];
+        // Fetch product details
+        const productIds = ongoingOrders.map(o => o.product_id);
+        if (productIds.length > 0) {
+            const resProducts = await query(`/items/shop?filter[id][_in]=${productIds.join(',')}&fields=id,name,description,price`);
+            const products = await resProducts.json();
+            const productMap = {};
+            if (products.data) {
+                products.data.forEach(p => productMap[p.id] = p);
+            }
+            ongoingOrders = ongoingOrders.map(o => ({
+                ...o,
+                product: productMap[o.product_id] || { name: 'Unknown', description: '', price: 0 }
+            }));
+        }
+    } catch (error) {
+        console.error('Error fetching ongoing orders:', error);
+        ongoingOrders = [];
+    }
+
+    // Fetch delivered orders
+    let deliveredOrders = [];
+    try {
+        const resDelivered = await query(`/items/orders?filter[user_id][_eq]=${userId}&filter[status][_eq]=delivered&fields=id,user_id,product_id,status,units,amount_paid`);
+        const deliveredData = await resDelivered.json();
+        deliveredOrders = deliveredData.data || [];
+        // Fetch product details
+        const productIds = deliveredOrders.map(o => o.product_id);
+        if (productIds.length > 0) {
+            const resProducts = await query(`/items/shop?filter[id][_in]=${productIds.join(',')}&fields=id,name,description,price`);
+            const products = await resProducts.json();
+            const productMap = {};
+            if (products.data) {
+                products.data.forEach(p => productMap[p.id] = p);
+            }
+            deliveredOrders = deliveredOrders.map(o => ({
+                ...o,
+                product: productMap[o.product_id] || { name: 'Unknown', description: '', price: 0 }
+            }));
+        }
+    } catch (error) {
+        console.error('Error fetching delivered orders:', error);
+        deliveredOrders = [];
+    }
+
     // Calculate pending notifications
     const pendingNotifications = teamsInvitedTo.filter(t => t.status === 'pending').length;
 
@@ -214,7 +264,9 @@ router.get('/', async (req, res) => {
         monthlyTasksLabels: monthlyTasksLabels,
         monthlyTasksData: monthlyTasksData,
         projectCompletionByMonth: projectCompletionByMonth,
-        shopItems: shopItems
+        shopItems: shopItems,
+        ongoingOrders: ongoingOrders,
+        deliveredOrders: deliveredOrders
     });
 });
 

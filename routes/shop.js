@@ -27,16 +27,17 @@ router.get('/', async (req, res) => {
         return res.redirect('/login');
     }
     try {
-        const resItems = await query('/items/products?fields=*,media.*');
+        const resItems = await query('/items/shop?fields=*,media.id');
         const items = await resItems.json();
+        // console.log('Shop items:', items.data ? items.data.slice(0, 2) : 'No data');
         // Fetch cart count (pending orders)
         const resOrders = await query(`/items/orders?filter[user_id][_eq]=${req.session.user.id}&filter[status][_eq]=pending`);
         const orders = await resOrders.json();
         const cartCount = orders.data ? orders.data.length : 0;
-        res.render('shop', { user: req.session.user, items: items.data || [], cartCount });
+        res.render('shop', { user: req.session.user, items: items.data || [], cartCount, directusToken: accessToken });
     } catch (error) {
         console.error('Error fetching shop items:', error);
-        res.render('shop', { user: req.session.user, items: [] });
+        res.render('shop', { user: req.session.user, items: [], cartCount: 0, directusToken: accessToken });
     }
 });
 

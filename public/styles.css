@@ -167,3 +167,8 @@ footer {
   padding: 1rem 0;
   user-select: none;
 }
+
+/* Sidebar background */
+.sidebar-bg {
+  background-color: var(--bg-secondary) !important;
+}

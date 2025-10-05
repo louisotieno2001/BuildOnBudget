@@ -302,5 +302,42 @@ function updateTeamsInvitedTo() {
   });
 }
 
+  
+// Sub-tabs for shop orders
+document.addEventListener('DOMContentLoaded', function() {
+  const subTabButtons = document.querySelectorAll('.sub-tab-button');
+  const subTabContents = document.querySelectorAll('.sub-tab-content');
+  let activeSubTab = 'ongoing';
+
+  subTabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      activeSubTab = button.dataset.subTab;
+      updateSubTabs();
+    });
+  });
+
+  function updateSubTabs() {
+    subTabContents.forEach(content => {
+      if (content.id === `sub-tab-${activeSubTab}`) {
+        content.classList.remove('hidden');
+      } else {
+        content.classList.add('hidden');
+      }
+    });
+    subTabButtons.forEach(button => {
+      if (button.dataset.subTab === activeSubTab) {
+        button.classList.add('bg-accent', 'text-text-primary');
+        button.classList.remove('hover:bg-bg-primary');
+      } else {
+        button.classList.remove('bg-accent', 'text-text-primary');
+        button.classList.add('hover:bg-bg-primary');
+      }
+    });
+  }
+
+  updateSubTabs();
+});
+
+
 // Initial setup
 updateTabs();
