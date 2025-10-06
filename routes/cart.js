@@ -100,11 +100,12 @@ router.post('/checkout', async (req, res) => {
         const resItems = await query(`/items/shop?filter[id][_in]=${itemIds.join(',')}`);
         const items = await resItems.json();
         
-        // Update each order to complete
+        // Update each order to complete and subtract units from shop
         for (const order of orders.data) {
             const item = items.data.find(i => i.id == order.product_id);
             const amount_paid = parseFloat(item.price) * parseInt(order.units);
             const payment_message = `paid by ${req.session.user.name}`;
+            const current_date = new Date();
             // console.log('Updating order:', order.id, 'amount_paid:', amount_paid, 'units:', order.units, 'payment_message:', payment_message);
             await query(`/items/orders/${order.id}`, {
                 method: 'PATCH',
@@ -112,8 +113,15 @@ router.post('/checkout', async (req, res) => {
                     status: 'complete',
                     amount_paid,
                     units: parseInt(order.units),
-                    payment_message
+                    payment_message,
+                    update_date: current_date
                 })
+            });
+            // Update shop item units
+            const newUnits = item.units - parseInt(order.units);
+            await query(`/items/shop/${item.id}`, {
+                method: 'PATCH',
+                body: JSON.stringify({ units: newUnits })
             });
         }
         res.json({ message: 'Order placed successfully' });

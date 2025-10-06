@@ -38,8 +38,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         formData.append('contractors', contractors);
         formData.append('permits', permits);
         formData.append('safety', safety);
-        for (let file of attachments) {
-            formData.append('attachments', file);
+        const attachment = document.getElementById('attachments').files[0];
+        if (attachment) {
+            formData.append('attachments', attachment);
         }
 
         try {

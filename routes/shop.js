@@ -47,13 +47,15 @@ router.post('/add-to-cart', async (req, res) => {
         return res.status(401).json({ error: 'Not logged in' });
     }
     const { item_id, quantity } = req.body;
+    const current_date = new Date();
     try {
         // Insert into orders collection with status pending
         const orderData = {
             user_id: req.session.user.id,
             product_id: item_id,
             status: 'pending',
-            units: parseInt(quantity)
+            units: parseInt(quantity),
+            creation_date: current_date
         };
         const resOrder = await query('/items/orders', {
             method: 'POST',

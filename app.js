@@ -8,7 +8,7 @@ const { Pool } = require('pg');
 const pgSession = require('connect-pg-simple')(session);
 const cors = require('cors');
 const multer = require('multer');
-const upload = multer().array('attachments', 10);
+const upload = multer().single('attachments');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const cookieParser = require('cookie-parser');
 
@@ -18,10 +18,13 @@ const PORT = process.env.PORT || 3000;
 const url = process.env.DIRECTUS_URL;
 const accessToken = process.env.DIRECTUS_TOKEN;
 
-// Initializations
+// Proxy configuration
 const apiProxy = createProxyMiddleware({
-    target: 'http://0.0.0.0:8055',
-    changeOrigin: true,
+    target: 'http://0.0.0.0:8055/assets', // Target server where requests should be proxied
+    changeOrigin: true, // Adjust the origin of the request to the target
+    headers: {
+        "Authorization": "Bearer "+accessToken
+    }
 });
 
 // Postgresql conf
@@ -84,7 +87,8 @@ async function query(path, config) {
 // Assets API
 async function uploadToDirectus(file) {
     const formData = new FormData();
-    formData.append('file', file.buffer, { filename: file.originalname, contentType: file.mimetype });
+    const blob = new Blob([file.buffer], { type: file.mimetype });
+    formData.append('file', blob, file.originalname);
     try {
         const res = await fetch(`${url}/files`, {
             method: 'POST',
@@ -248,16 +252,14 @@ app.post('/new-project', upload, async (req, res) => {
             return res.status(400).json({ error: 'Please fill in all required fields' });
         }
 
-        const attachments = req.files || [];
-        const attachmentIds = [];
-        if (attachments.length > 0) {
-            for (let file of attachments) {
-                try {
-                    const uploaded = await uploadToDirectus(file);
-                    attachmentIds.push(uploaded.data.id);
-                } catch (err) {
-                    console.error('Error uploading file:', err);
-                }
+        const attachment = req.file;
+        let attachmentId = null;
+        if (attachment) {
+            try {
+                const uploaded = await uploadToDirectus(attachment);
+                attachmentId = uploaded.data.id;
+            } catch (err) {
+                console.error('Error uploading file:', err);
             }
         }
 
@@ -275,7 +277,7 @@ app.post('/new-project', upload, async (req, res) => {
             contractors,
             permits,
             safety,
-            media: attachmentIds,
+            media: attachmentId,
             status: false,
             user_id: user_id
         };

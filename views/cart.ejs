@@ -8,18 +8,26 @@
   <link href="/output.css" rel="stylesheet" />
   <link href="/toast.css" rel="stylesheet" />
   <link rel="shortcut icon" href="/images/logo.png" type="image/x-icon" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <script defer src="/javascript/index.js"></script>
 </head>
 
 <body class="bg-bg-primary text-text-primary min-h-screen flex flex-col">
-  <header class="bg-bg-secondary shadow-md sticky top-0 z-50 p-4">
+  <header class="sidebar-bg shadow-md sticky top-0 z-50 p-4">
     <div class="flex justify-between items-center">
-      <h1 class="text-3xl font-bold text-purple-600"><%= user.name %>'s Cart</h1>
-      <a href="/shop" class="bg-accent px-4 py-2 rounded text-text-primary hover:bg-accent/90">Continue Shopping</a>
+      <div class="flex items-center space-x-2">
+        <a href="/shop" class="bg-purple-600 text-white px-4 py-1 rounded text-text-primary text-xl hover:bg-accent/90" title="Go back to shopping">
+          <i class="fa-solid fa-arrow-left"></i>
+        </a>
+        <a href="/dashboard" class="md:hidden bg-purple-600 text-white px-4 py-1 rounded text-text-primary text-xl hover:bg-accent/90" title="Go to dashboard">
+          <i class="fa-solid fa-tachometer-alt"></i>
+        </a>
+      </div>
     </div>
   </header>
 
   <main class="flex-grow p-4 md:p-8 max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold text-purple-600"><%= user.name %>'s Cart</h1>
     <% if (cartItems.length === 0) { %>
       <p class="text-text-secondary text-center">Your cart is empty. <a href="/shop" class="text-accent">Shop now</a></p>
     <% } else { %>
@@ -27,13 +35,13 @@
         <% cartItems.forEach(item => { %>
           <div class="cart-item bg-bg-secondary rounded-lg shadow p-4 flex flex-col md:flex-row md:items-center md:justify-between">
             <div class="flex items-center space-x-4 mb-4 md:mb-0">
-              <img src="<%= item.image || '/images/logo.png' %>" alt="<%= item.name %>" class="h-16 w-16 object-cover rounded" />
+              <img src="<%= item.media.id || '/images/cart.png' %>" alt="<%= item.name %>" class="h-16 w-16 object-cover rounded" />
               <div>
                 <h3 class="text-lg font-semibold"><%= item.name %></h3>
                 <p class="item-price text-text-secondary">$<%= parseFloat(item.price).toFixed(2) %> each</p>
               </div>
             </div>
-            <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-4 ml-4">
               <input type="number" min="1" value="<%= item.quantity || 1 %>" data-id="<%= item.order_id %>"
                 class="quantity-input w-16 border border-border rounded px-2 py-1 text-center" />
           <span class="item-total font-bold">$<%= (item.total || 0).toFixed(2) %></span>
@@ -45,7 +53,7 @@
       <div class="mt-8 bg-bg-secondary rounded-lg shadow p-4">
         <div class="flex justify-between items-center">
           <span id="overall-total" class="text-xl font-bold">Total: $<%= cartItems.reduce((sum, item) => sum + (item.total || 0), 0).toFixed(2) %></span>
-          <button id="checkout-btn" class="bg-accent px-6 py-2 rounded text-text-primary hover:bg-accent/90 cursor-pointer">Checkout</button>
+          <button id="checkout-btn" class="bg-purple-600 text-white px-4 py-2 rounded text-text-primary hover:bg-accent/90 cursor-pointer">Checkout</button>
         </div>
       </div>
     <% } %>

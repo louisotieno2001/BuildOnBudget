@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast(result.error || 'An error occurred during signup.', 'error');
       } else {
         showToast(result.message || 'Signup successful!', 'success');
-        // You can clear form or redirect here
+        window.location.href = '/login'
       }
     } catch (error) {
       showToast('Network error. Please try again later.', 'error');

@@ -129,6 +129,7 @@ router.get('/', async (req, res) => {
             const projectQuery = projectIds.map(id => `filter[id][_in]=${id}`).join('&');
             const resAllProjects = await query(`/items/projects?${projectQuery}&fields=id,name`);
             const allProjects = await resAllProjects.json();
+            console.log(allProjects)
             allProjects.data.forEach(p => projectMap[p.id] = p);
         } catch (error) {
             console.error('Error fetching projects for teams:', error);
@@ -184,7 +185,7 @@ router.get('/', async (req, res) => {
     // Fetch ongoing orders (status complete)
     let ongoingOrders = [];
     try {
-        const resOngoing = await query(`/items/orders?filter[user_id][_eq]=${userId}&filter[status][_eq]=complete&fields=id,user_id,product_id,status,units,amount_paid`);
+        const resOngoing = await query(`/items/orders?filter[user_id][_eq]=${userId}&filter[status][_eq]=complete&fields=id,user_id,product_id,status,units,amount_paid, update_date, delivered_date`);
         const ongoingData = await resOngoing.json();
         ongoingOrders = ongoingData.data || [];
         // Fetch product details
@@ -209,7 +210,7 @@ router.get('/', async (req, res) => {
     // Fetch delivered orders
     let deliveredOrders = [];
     try {
-        const resDelivered = await query(`/items/orders?filter[user_id][_eq]=${userId}&filter[status][_eq]=delivered&fields=id,user_id,product_id,status,units,amount_paid`);
+        const resDelivered = await query(`/items/orders?filter[user_id][_eq]=${userId}&filter[status][_eq]=delivered&fields=id,user_id,product_id,status,units,amount_paid, update_date, delivered_date`);
         const deliveredData = await resDelivered.json();
         deliveredOrders = deliveredData.data || [];
         // Fetch product details
@@ -278,6 +279,7 @@ router.get('/:id', async (req, res) => {
 
     const projectId = req.params.id;
     const project = await fetchProjectById(projectId);
+    console.log('Fetched project:', project);
 
     if (!project) {
         return res.status(404).send('Project not found');

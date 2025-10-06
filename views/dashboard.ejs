@@ -21,7 +21,9 @@
       <!-- Left: Menu + Brand -->
       <div class="flex items-center space-x-4">
         <button id="sidebar-toggle" class="md:hidden text-text-primary">
-           <i class="fas fa-bars text-xl"></i>
+          <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+          </svg>
         </button>
         <div class="hidden md:flex items-center space-x-2">
           <img src="/images/logo.png" alt="Logo" class="w-8 h-8">
@@ -30,7 +32,7 @@
       </div>
       <!-- Right: Actions -->
       <div class="flex items-center space-x-4">
-        <button class="hidden sm:block bg-accent px-3 py-1 rounded-lg text-text-primary text-sm hover:opacity-90 transition cursor-pointer">
+        <button class="hidden sm:block bg-purple-600 text-white px-3 py-1 rounded-lg text-text-primary text-sm hover:opacity-90 transition cursor-pointer">
           <a href="/new-project">+ New Project</a>
         </button>
         <button id="profile-toggle" class="relative">
@@ -55,7 +57,7 @@
 
     <!-- SIDEBAR -->
     <aside id="sidebar"
-      class="fixed md:static inset-y-0 left-0 w-72 sidebar-bg border-r border-bg-secondary z-50 transform transition-transform duration-300 -translate-x-full md:translate-x-0 cursor-pointer">
+      class="fixed md:static inset-y-0 left-0 w-72 sidebar-bg z-50 transform transition-transform duration-300 -translate-x-full md:translate-x-0 cursor-pointer">
         
       <div class="flex flex-col h-full">
        <!-- Sidebar Profile -->
@@ -212,7 +214,7 @@
       <div id="tab-tasks" class="tab-content bg-bg-secondary rounded-xl p-6 shadow hidden">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-xl font-bold">📝 Tasks</h3>
-          <button class="bg-accent px-3 py-1 rounded-lg text-white text-sm hover:opacity-90 transition cursor-pointer">
+          <button class="bg-purple-600 text-white px-3 py-1 rounded-lg text-white text-sm hover:opacity-90 transition cursor-pointer">
             <a href="/new-task">+ New Task</a>
           </button>
         </div>
@@ -249,7 +251,7 @@
       <div id="tab-budget" class="tab-content bg-bg-secondary rounded-xl p-6 shadow hidden">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-xl font-bold">💰 Budget</h3>
-          <button class="bg-accent px-3 py-1 rounded-lg text-white text-sm hover:opacity-90 transition cursor-pointer">
+          <button class="bg-purple-600 text-white px-3 py-1 rounded-lg text-white text-sm hover:opacity-90 transition cursor-pointer">
             <a href="/budget">+ New Budget</a>
           </button>
         </div>
@@ -313,70 +315,80 @@
       </div>
 
         <div id="tab-shop" class="tab-content bg-bg-secondary rounded-xl p-6 shadow hidden">
-          <h3 class="text-2xl font-bold">🛒 Shop</h3>
-          <div class="flex justify-between items-center mb-4">
-            <div class="flex space-x-4">
-              <button class="sub-tab-button bg-accent text-text-primary px-4 py-2 rounded" data-sub-tab="ongoing">Ongoing</button>
-              <button class="sub-tab-button hover:bg-bg-primary px-4 py-2 rounded" data-sub-tab="delivered">Delivered</button>
-            </div>
-            <div>
+          <div class="flex flex-row justify-between">
+            <h3 class="text-2xl font-bold">🛒 Shop</h3>
+            <button class="bg-purple-600 text-white rounded-lg">
               <a href="/shop" class="bg-accent px-6 py-2 rounded text-text-primary hover:bg-accent/90 transition">Go to Shop</a>
+            </button>
+          </div>
+          <div class="flex justify-between items-center mb-4">
+            <div class="flex space-x-4 mt-4">
+              <button class="sub-tab-button bg-purple-600 text-white px-4 py-1 rounded" data-sub-tab="ongoing">Ongoing</button>
+              <button class="sub-tab-button bg-purple-600 text-white hover:bg-bg-primary px-4 py-1 rounded" data-sub-tab="delivered">Delivered</button>
             </div>
           </div>
           <div id="sub-tab-ongoing" class="sub-tab-content">
-            <h4 class="text-lg font-semibold mb-4 underline">Ongoing Orders</h4>
+            <!-- <h4 class="text-lg font-semibold mb-4 underline">Ongoing Orders</h4> -->
             <% if (ongoingOrders && ongoingOrders.length > 0) { %>
-              <table class="w-full table-auto bg-bg-primary rounded-xl overflow-hidden shadow-lg border border-border">
-                <thead class="bg-bg-secondary">
-                  <tr>
-                    <th class="px-4 py-2 text-left">Order ID</th>
-                    <th class="px-4 py-2 text-left">Product</th>
-                    <th class="px-4 py-2 text-left">Units</th>
-                    <th class="px-4 py-2 text-left">Amount Paid</th>
-                    <th class="px-4 py-2 text-left">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <% ongoingOrders.forEach(order => { %>
-                    <tr class="border-t border-border hover:bg-bg-secondary transition">
-                      <td class="px-4 py-2"><%= order.id %></td>
-                      <td class="px-4 py-2"><%= order.product.name %></td>
-                      <td class="px-4 py-2"><%= order.units %></td>
-                      <td class="px-4 py-2">$<%= parseFloat(order.amount_paid).toFixed(2) %></td>
-                      <td class="px-4 py-2"><%= order.status %></td>
+              <div class="overflow-x-auto">
+                <table class="table-auto bg-bg-primary rounded-xl overflow-hidden shadow-lg border border-border" style="width: 1000px;">
+                  <thead class="bg-bg-secondary">
+                    <tr>
+                      <th class="px-4 py-2 text-left">Order ID</th>
+                      <th class="px-4 py-2 text-left">Product</th>
+                      <th class="px-4 py-2 text-left">Units</th>
+                      <th class="px-4 py-2 text-left">Amount Paid</th>
+                      <th class="px-4 py-2 text-left">Status</th>
+                      <th class="px-4 py-2 text-left">Date</th>
                     </tr>
-                  <% }) %>
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    <% ongoingOrders.forEach(order => { %>
+                      <tr class="border-t border-border hover:bg-bg-secondary transition">
+                        <td class="px-4 py-2"><%= order.id %></td>
+                        <td class="px-4 py-2"><%= order.product.name %></td>
+                        <td class="px-4 py-2"><%= order.units %></td>
+                        <td class="px-4 py-2">$<%= parseFloat(order.amount_paid).toFixed(2) %></td>
+                        <td class="px-4 py-2"><%= order.status %></td>
+                        <td class="px-4 py-2"><%= order.update_date %></td>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              </div>
             <% } else { %>
               <p class="text-text-secondary">No ongoing orders.</p>
             <% } %>
           </div>
           <div id="sub-tab-delivered" class="sub-tab-content hidden">
-            <h4 class="text-lg font-semibold mb-4 underline">Delivered Orders</h4>
+            <!-- <h4 class="text-lg font-semibold mb-4 underline">Delivered Orders</h4> -->
             <% if (deliveredOrders && deliveredOrders.length > 0) { %>
-              <table class="w-full table-auto bg-bg-primary rounded-xl overflow-hidden shadow-lg border border-border">
-                <thead class="bg-bg-secondary">
-                  <tr>
-                    <th class="px-4 py-2 text-left">Order ID</th>
-                    <th class="px-4 py-2 text-left">Product</th>
-                    <th class="px-4 py-2 text-left">Units</th>
-                    <th class="px-4 py-2 text-left">Amount Paid</th>
-                    <th class="px-4 py-2 text-left">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <% deliveredOrders.forEach(order => { %>
-                    <tr class="border-t border-border hover:bg-bg-secondary transition">
-                      <td class="px-4 py-2"><%= order.id %></td>
-                      <td class="px-4 py-2"><%= order.product.name %></td>
-                      <td class="px-4 py-2"><%= order.units %></td>
-                      <td class="px-4 py-2">$<%= parseFloat(order.amount_paid).toFixed(2) %></td>
-                      <td class="px-4 py-2"><%= order.status %></td>
+              <div class="overflow-x-auto">
+                <table class="table-auto bg-bg-primary rounded-xl overflow-hidden shadow-lg border border-border" style="width: 1000px;">
+                  <thead class="bg-bg-secondary">
+                    <tr>
+                      <th class="px-4 py-2 text-left">Order ID</th>
+                      <th class="px-4 py-2 text-left">Product</th>
+                      <th class="px-4 py-2 text-left">Units</th>
+                      <th class="px-4 py-2 text-left">Amount Paid</th>
+                      <th class="px-4 py-2 text-left">Status</th>
+                      <th class="px-4 py-2 text-left">Date</th>
                     </tr>
-                  <% }) %>
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    <% deliveredOrders.forEach(order => { %>
+                      <tr class="border-t border-border hover:bg-bg-secondary transition">
+                        <td class="px-4 py-2"><%= order.id %></td>
+                        <td class="px-4 py-2"><%= order.product.name %></td>
+                        <td class="px-4 py-2"><%= order.units %></td>
+                        <td class="px-4 py-2">$<%= parseFloat(order.amount_paid).toFixed(2) %></td>
+                        <td class="px-4 py-2"><%= order.status %></td>
+                         <td class="px-4 py-2"><%= order.delivered_date %></td>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              </div>
             <% } else { %>
               <p class="text-text-secondary">No delivered orders.</p>
             <% } %>
@@ -386,7 +398,7 @@
       <div id="tab-teams" class="tab-content bg-bg-secondary rounded-xl p-6 shadow hidden">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-xl font-bold">👥 Teams</h3>
-          <button class="bg-accent px-3 py-1 rounded-lg text-white text-sm hover:opacity-90 transition cursor-pointer">
+          <button class="bg-purple-600 text-white px-3 py-1 rounded-lg text-white text-sm hover:opacity-90 transition cursor-pointer">
             <a href="/invite-member">+ Invite Team Member</a>
           </button>
         </div>
@@ -482,7 +494,7 @@
               <input type="tel" id="phone" name="phone" value="<%= user.phone || '' %>"
                 class="w-full border border-border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent" />
             </div>
-            <button type="submit" class="bg-accent text-text-primary w-full px-4 py-2 rounded-md hover:bg-accent/90 transition cursor-pointer">
+            <button type="submit" class="bg-purple-600 text-white w-full px-4 py-2 rounded-md hover:bg-accent/90 transition cursor-pointer">
               Update Details
             </button>
           </form>
@@ -519,7 +531,7 @@
         <% if (teamsInvitedTo && teamsInvitedTo.length > 0) { %>
           <div class="space-y-4">
             <% teamsInvitedTo.forEach(team => { %>
-              <div class="bg-transparent p-4 rounded-lg border <%= team.status === 'pending' ? 'border-yellow-500 bg-yellow-50' : 'border-border' %>">
+              <div class="bg-transparent p-4 rounded-lg border <%= team.status === 'pending' ? 'border-yellow-500 bg-yellow-100' : 'border-border' %>">
                 <div class="flex justify-between items-center">
                   <div>
                     <p class="font-medium"><%= team.project_id ? team.project_id.name : 'Unknown Project' %></p>
