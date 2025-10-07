@@ -127,7 +127,7 @@ router.get('/', async (req, res) => {
     if (projectIds.length > 0) {
         try {
             const projectQuery = projectIds.map(id => `filter[id][_in]=${id}`).join('&');
-            const resAllProjects = await query(`/items/projects?${projectQuery}&fields=id,name`);
+            const resAllProjects = await query(`/items/projects?${projectQuery}&fields=id,name,user_id,budget,description`);
             const allProjects = await resAllProjects.json();
             console.log(allProjects)
             allProjects.data.forEach(p => projectMap[p.id] = p);
@@ -139,6 +139,28 @@ router.get('/', async (req, res) => {
     // Enrich teams with project data
     teamsByYou = teamsByYou.map(team => ({ ...team, project_id: projectMap[team.project_id] || null }));
     teamsInvitedTo = teamsInvitedTo.map(team => ({ ...team, project_id: projectMap[team.project_id] || null }));
+
+    // Collect unique invited projects
+    let invitedProjects = [];
+    const invitedProjectIds = new Set();
+    teamsInvitedTo.forEach(team => {
+        if (team.project_id && !invitedProjectIds.has(team.project_id.id) && team.project_id.user_id !== userId) {
+            invitedProjectIds.add(team.project_id.id);
+            invitedProjects.push({ project: team.project_id, role: team.role });
+        }
+    });
+
+    // Fetch tasks for invited projects
+    for (let item of invitedProjects) {
+        try {
+            const resTasks = await query(`/items/tasks?filter[project_id][_eq]=${item.project.id}`);
+            const tasks = await resTasks.json();
+            item.project.tasks = tasks.data || [];
+        } catch (error) {
+            console.error('Error fetching tasks for invited project:', item.project.id, error);
+            item.project.tasks = [];
+        }
+    }
 
     // Calculate stats
     const activeProjects = projects.length;
@@ -253,6 +275,7 @@ router.get('/', async (req, res) => {
     res.render('dashboard', {
         user: req.session.user,
         projects: projects,
+        invitedProjects: invitedProjects,
         budgets: budgets,
         teamsByYou: teamsByYou,
         teamsInvitedTo: teamsInvitedTo,

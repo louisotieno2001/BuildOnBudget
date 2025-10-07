@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Demo - BuildOnBudget</title>
+  <link href="/output.css" rel="stylesheet" />
+  <link rel="shortcut icon" href="/images/logo.png" type="image">
+  <script defer src="/javascript/index.js"></script>
+  <style>
+    .logo {
+      width: 6em;
+      height: 6em;
+    }
+  </style>
+</head>
+
+<body class="bg-bg-primary text-text-primary min-h-screen flex flex-col font-sans">
+
+  <!-- Header -->
+  <div x-data="{ mobileOpen: false }">
+  <!-- Desktop Header (md+) -->
+  <header class="hidden md:flex bg-bg-primary text-text-primary border-b px-6 py-3 justify-between items-center sticky top-0 z-50">
+    <!-- Logo -->
+    <div class="flex items-center gap-2">
+      <img class="w-12 h-12 logo" src="/images/logo.png" alt="Logo">
+      <span class="hidden md:inline text-2xl font-extrabold text-purple-700">BuildOnBudget</span>
+    </div>
+
+    <!-- Desktop Nav -->
+    <nav class="block">
+      <ul class="flex space-x-6">
+        <li><a href="/" class="text-text-primary hover:text-purple-700 font-semibold transition">Home</a></li>
+        <li><a href="/login" class="text-text-primary hover:text-purple-700 font-semibold transition">Login</a></li>
+        <li><a href="/signup" class="bg-purple-600 text-white px-5 py-2 rounded-lg shadow hover:bg-purple-700 transition">Get Started</a></li>
+      </ul>
+    </nav>
+  </header>
+  <!-- Mobile Header (below md) -->
+  <header class="md:hidden bg-bg-primary text-text-primary border-b px-6 py-3 flex justify-between items-center sticky top-0 z-50">
+    <div class="flex items-center gap-2">
+      <img class="w-10 h-10 logo" src="/images/logo.png" alt="Logo">
+    </div>
+    <button @click="mobileOpen = !mobileOpen" aria-label="Toggle menu" class="p-2 rounded-md border border-border">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
+    </button>
+  </header>
+  <!-- Mobile Dropdown Menu -->
+  <nav x-show="mobileOpen" x-transition class="md:hidden border-b border-border px-6 py-3 bg-bg-primary z-40">
+    <ul class="space-y-3">
+      <li><a @click="mobileOpen = false" href="/" class="block text-text-primary hover:text-purple-700 font-semibold transition">Home</a></li>
+      <li><a @click="mobileOpen = false" href="/login" class="block text-text-primary hover:text-purple-700 font-semibold transition">Login</a></li>
+      <li><a @click="mobileOpen = false" href="/signup" class="inline-block bg-purple-600 text-white px-5 py-2 rounded-lg shadow hover:bg-purple-700 transition">Get Started</a></li>
+    </ul>
+  </nav>
+  </div>
+
+  <!-- Main Content -->
+  <main class="flex-1 px-10 lg:px-24 py-16">
+    <h1 class="text-4xl lg:text-5xl font-extrabold text-center text-purple-700 mb-12">How to Use BuildOnBudget</h1>
+    <p class="text-lg text-text-secondary text-center mb-16">Follow these simple steps to get started with managing your projects, budgets, and teams effectively.</p>
+
+    <!-- Instructions Steps -->
+    <div class="space-y-12">
+      <!-- Step 1 -->
+      <div class="flex flex-col lg:flex-row items-center gap-8">
+        <div class="flex-1">
+          <h2 class="text-3xl font-bold mb-4 text-text-primary">1. Sign Up and Create an Account</h2>
+          <p class="text-text-secondary mb-4">Start by signing up for a free account. Provide your name, email, and phone number. Verify your email and phone for full access.</p>
+          <ul class="list-disc list-inside text-text-secondary space-y-2">
+            <li>Go to the signup page and fill in your details.</li>
+            <li>Check your email for verification.</li>
+            <li>Verify your phone number via SMS.</li>
+          </ul>
+        </div>
+        <div class="flex-1 flex justify-center">
+          <div class="w-64 h-48 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-lg flex items-center justify-center text-white text-2xl font-bold">
+            Sign Up
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="flex flex-col lg:flex-row-reverse items-center gap-8">
+        <div class="flex-1">
+          <h2 class="text-3xl font-bold mb-4 text-text-primary">2. Create Your First Project</h2>
+          <p class="text-text-secondary mb-4">Once logged in, create a new project to organize your work. Add a name, description, and set a budget.</p>
+          <ul class="list-disc list-inside text-text-secondary space-y-2">
+            <li>Navigate to the dashboard and click "New Project".</li>
+            <li>Fill in project details and upload images if needed.</li>
+            <li>Invite team members to collaborate.</li>
+          </ul>
+        </div>
+        <div class="flex-1 flex justify-center">
+          <div class="w-64 h-48 bg-gradient-to-br from-green-600 to-teal-600 rounded-lg flex items-center justify-center text-white text-2xl font-bold">
+            New Project
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="flex flex-col lg:flex-row items-center gap-8">
+        <div class="flex-1">
+          <h2 class="text-3xl font-bold mb-4 text-text-primary">3. Add and Manage Tasks</h2>
+          <p class="text-text-secondary mb-4">Break down your project into tasks. Assign them to team members, set deadlines, and track progress.</p>
+          <ul class="list-disc list-inside text-text-secondary space-y-2">
+            <li>Go to the Tasks tab in your project.</li>
+            <li>Create new tasks with descriptions and due dates.</li>
+            <li>Update status as tasks progress.</li>
+          </ul>
+        </div>
+        <div class="flex-1 flex justify-center">
+          <div class="w-64 h-48 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-lg flex items-center justify-center text-white text-2xl font-bold">
+            Tasks
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="flex flex-col lg:flex-row-reverse items-center gap-8">
+        <div class="flex-1">
+          <h2 class="text-3xl font-bold mb-4 text-text-primary">4. Manage Your Budget</h2>
+          <p class="text-text-secondary mb-4">Set budgets for projects and components. Track expenses to stay within limits and avoid overruns.</p>
+          <ul class="list-disc list-inside text-text-secondary space-y-2">
+            <li>Access the Budget tab and create a new budget.</li>
+            <li>Add components with costs.</li>
+            <li>Monitor allocations and spending.</li>
+          </ul>
+        </div>
+        <div class="flex-1 flex justify-center">
+          <div class="w-64 h-48 bg-gradient-to-br from-yellow-600 to-orange-600 rounded-lg flex items-center justify-center text-white text-2xl font-bold">
+            Budget
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 5 -->
+      <div class="flex flex-col lg:flex-row items-center gap-8">
+        <div class="flex-1">
+          <h2 class="text-3xl font-bold mb-4 text-text-primary">5. Invite Team Members</h2>
+          <p class="text-text-secondary mb-4">Collaborate with others by inviting team members. Assign roles and manage permissions.</p>
+          <ul class="list-disc list-inside text-text-secondary space-y-2">
+            <li>Use the Teams tab to invite members via email.</li>
+            <li>Specify roles like admin or member.</li>
+            <li>Accept invitations from others.</li>
+          </ul>
+        </div>
+        <div class="flex-1 flex justify-center">
+          <div class="w-64 h-48 bg-gradient-to-br from-red-600 to-pink-600 rounded-lg flex items-center justify-center text-white text-2xl font-bold">
+            Teams
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 6 -->
+      <div class="flex flex-col lg:flex-row-reverse items-center gap-8">
+        <div class="flex-1">
+          <h2 class="text-3xl font-bold mb-4 text-text-primary">6. Shop for Materials</h2>
+          <p class="text-text-secondary mb-4">Purchase materials and tools directly through the app. Track orders and deliveries.</p>
+          <ul class="list-disc list-inside text-text-secondary space-y-2">
+            <li>Visit the Shop tab to browse products.</li>
+            <li>Add items to cart and checkout.</li>
+            <li>Monitor order status in your dashboard.</li>
+          </ul>
+        </div>
+        <div class="flex-1 flex justify-center">
+          <div class="w-64 h-48 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center text-white text-2xl font-bold">
+            Shop
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Video Section -->
+    <section class="mt-20 text-center">
+      <h2 class="text-4xl font-extrabold text-purple-700 mb-8">Watch Our Demo Video</h2>
+      <p class="text-lg text-text-secondary mb-12">See BuildOnBudget in action with this quick demo video.</p>
+      <div class="flex justify-center">
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/jNQXAC9IVRw" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen class="rounded-lg shadow-lg"></iframe>
+      </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="mt-20 text-center bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-16 rounded-lg">
+      <h2 class="text-4xl font-extrabold mb-6">Ready to Get Started?</h2>
+      <p class="mb-8 text-lg">Join thousands of users building smarter and staying on budget.</p>
+      <a href="/signup" class="bg-white text-purple-700 px-10 py-4 rounded-lg font-bold shadow hover:bg-gray-100 transition">Sign Up Now</a>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="text-center py-6 mt-auto bg-bg-secondary text-text-primary border-t border-border">
+    &copy; <%= new Date().getFullYear() %> BuildOnBudget. All rights reserved.
+  </footer>
+
+</body>
+
+</html>
