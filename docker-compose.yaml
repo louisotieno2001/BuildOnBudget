@@ -11,8 +11,8 @@ services:
     volumes:
       - ./docker/pgdata:/var/lib/postgresql/data
     networks:
-      hustlerati:
-        ipv4_address: 102.68.86.163
+      buildonbudget:
+        ipv4_address: 192.168.1.10
 
   directus:
     restart: always
@@ -34,8 +34,8 @@ services:
       DB_PORT: 5432   
       EXTENSIONS_AUTO_RELOAD: true
     networks:
-      hustlerati:
-        ipv4_address: 102.68.86.163
+      buildonbudget:
+        ipv4_address: 192.168.1.10
     volumes:
       - ./docker/directus/uploads:/directus/uploads
       - ./docker/directus/extensions:/directus/extensions
@@ -55,14 +55,14 @@ services:
       DIRECTUS_URL: "http://directus:8055"
       DIRECTUS_TOKEN: ${DIRECTUS_TOKEN}
     networks:
-      hustlerati:
-        ipv4_address: 102.68.86.163
+      buildonbudget:
+        ipv4_address: 192.168.1.10
     ports:
       - "127.0.0.1:3000:3000"
 
 networks:
-  hustlerati:
+  buildonbudget:
     driver: bridge
     ipam:
       config:
-        - subnet: 102.68.86.0/24
+        - subnet: 192.168.1.0/24

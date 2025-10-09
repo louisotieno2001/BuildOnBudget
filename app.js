@@ -14,7 +14,7 @@ const cookieParser = require('cookie-parser');
 
 // Declarations
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.EXPRESS_PORT || 3000;
 const url = process.env.DIRECTUS_URL;
 const accessToken = process.env.DIRECTUS_TOKEN;
 
