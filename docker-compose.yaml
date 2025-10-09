@@ -1,0 +1,68 @@
+services:
+  postgres:
+    restart: always
+    image: postgres:13
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./docker/pgdata:/var/lib/postgresql/data
+    networks:
+      hustlerati:
+        ipv4_address: 102.68.86.163
+
+  directus:
+    restart: always
+    image: directus/directus:11.3.2
+    depends_on:
+      - postgres
+    ports:
+      - "127.0.0.1:8055:8055"
+    env_file:
+      - .env
+    extra_hosts:
+      - "buildonbudget.hustlerati.com:host-gateway"
+    environment:
+      DB_TYPE: postgres  # Specify the database type
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: postgres  # Use the service name as the host
+      DB_PORT: 5432   
+      EXTENSIONS_AUTO_RELOAD: true
+    networks:
+      hustlerati:
+        ipv4_address: 102.68.86.163
+    volumes:
+      - ./docker/directus/uploads:/directus/uploads
+      - ./docker/directus/extensions:/directus/extensions
+      - ./docker/directus/database:/directus/database
+      - ./docker/directus/templates:/directus/templates
+
+  express:
+    restart: always
+    build: .
+    depends_on:
+      - directus
+    env_file:
+      - .env
+    environment:
+      PORT: ${EXPRESS_PORT}
+      SALT_ROUNDS: 10
+      DIRECTUS_URL: "http://directus:8055"
+      DIRECTUS_TOKEN: ${DIRECTUS_TOKEN}
+    networks:
+      hustlerati:
+        ipv4_address: 102.68.86.163
+    ports:
+      - "127.0.0.1:3000:3000"
+
+networks:
+  hustlerati:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 102.68.86.0/24
