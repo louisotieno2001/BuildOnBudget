@@ -22,3 +22,4 @@ _thumbs/
 dist/
 node_modules/
 uploads/
+docker/
