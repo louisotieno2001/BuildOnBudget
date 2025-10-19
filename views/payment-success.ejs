@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title><%= title %> - BuildOnBudget</title>
+  <link href="/output.css" rel="stylesheet" />
+  <link href="/toast.css" rel="stylesheet" />
+  <link rel="shortcut icon" href="/images/logo.png" type="image/x-icon" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script defer src="/javascript/index.js"></script>
+</head>
+
+<body class="bg-bg-primary text-text-primary min-h-screen flex flex-col">
+  <header class="sidebar-bg shadow-md sticky top-0 z-50 p-4">
+    <div class="flex justify-between items-center">
+      <div class="flex items-center space-x-2">
+        <a href="/dashboard" class="bg-purple-600 text-white px-4 py-1 rounded text-text-primary text-xl hover:bg-accent/90" title="Go to dashboard">
+          <i class="fa-solid fa-tachometer-alt"></i>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow p-4 md:p-8 max-w-4xl mx-auto text-center">
+    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+      <i class="fas fa-check-circle text-4xl mb-2"></i>
+      <h1 class="text-3xl font-bold text-green-800"><%= title %></h1>
+      <p class="text-lg"><%= message %></p>
+    </div>
+
+    <div class="space-y-4">
+      <p class="text-text-secondary">Your order has been processed and you will receive a confirmation email shortly.</p>
+      <div class="flex justify-center space-x-4">
+        <a href="/dashboard" class="bg-purple-600 text-white px-6 py-2 rounded hover:bg-accent/90">Go to Dashboard</a>
+        <a href="/shop" class="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700">Continue Shopping</a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="bg-bg-secondary text-text-secondary text-center py-4 border-t border-border">
+    &copy; <%= new Date().getFullYear() %> BuildOnBudget. All rights reserved.
+  </footer>
+  <script src="/javascript/toast.js"></script>
+</body>
+
+</html>

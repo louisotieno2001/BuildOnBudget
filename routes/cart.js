@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const url = process.env.DIRECTUS_URL;
 const accessToken = process.env.DIRECTUS_TOKEN;
+const { initiateSTKPush } = require('../mpesa');
 
 // Query function to directus API endpoints
 async function query(path, config) {
@@ -82,7 +83,7 @@ router.post('/update', async (req, res) => {
     }
 });
 
-// Checkout - update orders to complete
+// Checkout - initiate M-Pesa STK Push
 router.post('/checkout', async (req, res) => {
     if (!req.session.user) {
         return res.status(401).json({ error: 'Not logged in' });
@@ -91,7 +92,6 @@ router.post('/checkout', async (req, res) => {
         // Fetch pending orders for the user
         const resOrders = await query(`/items/orders?filter[user_id]=${req.session.user.id}&filter[status]=pending&fields=id,user_id,product_id,status,units`);
         const orders = await resOrders.json();
-        // console.log('Checkout orders:', orders.data);
         if (!orders.data || orders.data.length === 0) {
             return res.status(400).json({ error: 'Cart is empty' });
         }
@@ -99,35 +99,41 @@ router.post('/checkout', async (req, res) => {
         const itemIds = orders.data.map(o => o.product_id);
         const resItems = await query(`/items/shop?filter[id][_in]=${itemIds.join(',')}`);
         const items = await resItems.json();
-        
-        // Update each order to complete and subtract units from shop
+
+        // Calculate total amount
+        let totalAmount = 0;
         for (const order of orders.data) {
             const item = items.data.find(i => i.id == order.product_id);
-            const amount_paid = parseFloat(item.price) * parseInt(order.units);
-            const payment_message = `paid by ${req.session.user.name}`;
-            const current_date = new Date();
-            // console.log('Updating order:', order.id, 'amount_paid:', amount_paid, 'units:', order.units, 'payment_message:', payment_message);
-            await query(`/items/orders/${order.id}`, {
-                method: 'PATCH',
-                body: JSON.stringify({
-                    status: 'complete',
-                    amount_paid,
-                    units: parseInt(order.units),
-                    payment_message,
-                    update_date: current_date
-                })
-            });
-            // Update shop item units
-            const newUnits = item.units - parseInt(order.units);
-            await query(`/items/shop/${item.id}`, {
-                method: 'PATCH',
-                body: JSON.stringify({ units: newUnits })
-            });
+            totalAmount += parseFloat(item.price) * parseInt(order.units);
         }
-        res.json({ message: 'Order placed successfully' });
+
+        // Get phone number from request body, fallback to session
+        const phoneNumber = req.body.phone || req.session.user.phone;
+        if (!phoneNumber) {
+            return res.status(400).json({ error: 'Phone number is required' });
+        }
+
+        const accountReference = `Order-${req.session.user.id}-${Date.now()}`;
+        const transactionDesc = 'Payment for BuildOnBudget order';
+
+        const stkPushResponse = await initiateSTKPush(phoneNumber, totalAmount, accountReference, transactionDesc);
+
+        // Store STK Push details in session or database for callback verification
+        req.session.pendingPayment = {
+            checkoutRequestId: stkPushResponse.CheckoutRequestID,
+            orders: orders.data,
+            items: items.data,
+            totalAmount,
+            accountReference
+        };
+
+        res.json({
+            message: 'STK Push initiated. Please check your phone to complete payment.',
+            checkoutRequestId: stkPushResponse.CheckoutRequestID
+        });
     } catch (error) {
         console.error('Error during checkout:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: 'Failed to initiate payment' });
     }
 });
 

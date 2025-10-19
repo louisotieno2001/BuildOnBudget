@@ -65,19 +65,34 @@ document.querySelectorAll('.remove-btn').forEach(button => {
 // Checkout
 document.getElementById('checkout-btn')?.addEventListener('click', async () => {
     const button = document.getElementById('checkout-btn');
+    const phoneInput = document.getElementById('phone');
+    const phoneError = document.getElementById('phone-error');
+    const phoneValue = phoneInput.value.trim();
+
+    // Validate phone number
+    const phoneRegex = /^\+254\s?7\d{8}$/;
+    if (!phoneRegex.test(phoneValue)) {
+        phoneError.querySelector('span').textContent = 'Phone must be in the format +254 7xxxxxxxx.';
+        phoneError.classList.remove('hidden');
+        return;
+    } else {
+        phoneError.classList.add('hidden');
+    }
+
     button.disabled = true;
     button.textContent = 'Processing...';
     try {
         const response = await fetch('/cart/checkout', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone: phoneValue })
         });
         const result = await response.json();
         if (response.ok) {
-            showToast('Order placed successfully', 'success');
-            setTimeout(() => location.href = '/dashboard', 1000);
+            showToast('STK Push initiated. Please check your phone to complete payment.', 'success');
+            // Optionally redirect or update UI
         } else {
-            showToast(result.error || 'Failed to place order', 'error');
+            showToast(result.error || 'Failed to initiate payment', 'error');
             button.disabled = false;
             button.textContent = 'Checkout';
         }

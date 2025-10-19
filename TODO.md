@@ -1,11 +1,17 @@
-# Restyle shop.ejs to match dashboard.ejs
+# M-Pesa Daraja API STK Push Implementation for Checkout
 
-## Tasks
-- [x] Update shop.ejs header to match dashboard.ejs (sticky, bg-bg-secondary, logo, nav with cart and dashboard links, profile dropdown)
-- [x] Add sidebar to shop.ejs with filter parameters (categories like roofing, subcategories)
-- [x] Restyle main content area in shop.ejs to use bg-bg-secondary for cards and consistent colors (remove gradients, use bg-accent for buttons)
-- [x] Update footer in shop.ejs to match dashboard.ejs style
-- [x] Create public/javascript/shop.js for filtering logic (categories, subcategories, search)
-- [x] Ensure responsiveness for small screens (mobile overlay, sidebar toggle like dashboard.ejs)
-- [x] Integrate existing search and category select into sidebar or main content
-- [x] Test filtering functionality and responsiveness
+## Completed Tasks
+- [x] Add M-Pesa credentials placeholders to .env
+- [x] Install axios for HTTP requests (optional, since fetch is used, but axios might be easier)
+- [x] Create a new module (mpesa.js) for M-Pesa API functions: get access token, initiate STK Push, handle callback
+- [x] Modify /cart/checkout route: Instead of immediately completing, initiate STK Push and return a waiting message
+- [x] Add a new route for M-Pesa callback to confirm payment and update order status
+- [x] Update frontend to handle the new checkout flow (e.g., show waiting for payment, poll for status or redirect after callback)
+- [x] Ensure order status is updated only on successful payment
+- [x] Create a fallback URL page that tells the user payment is successful
+
+## Remaining Tasks
+- [ ] Implement order completion logic in the callback handler
+- [ ] Add proper session/database storage for pending payments
+- [ ] Update frontend JavaScript to handle the new checkout response
+- [ ] Test the integration with actual M-Pesa credentials

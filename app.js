@@ -126,6 +126,8 @@ const shopRoute = require('./routes/shop');
 app.use('/shop', shopRoute);
 const cartRoute = require('./routes/cart');
 app.use('/cart', cartRoute);
+const mpesaRoute = require('./routes/mpesa');
+app.use('/mpesa', mpesaRoute);
 const editBudgetRoute = require('./routes/edit-budget');
 app.use('/edit-budget', editBudgetRoute);
 const inviteMemberRoute = require('./routes/invite-member');
