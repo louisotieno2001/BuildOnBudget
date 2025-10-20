@@ -53,7 +53,7 @@ router.post('/callback', async (req, res) => {
 
                 // TODO: Complete the order processing here
                 // This would involve updating orders to 'complete', subtracting units from shop, etc.
-
+                
             } else {
                 // Payment failed
                 console.log(`Payment failed with result code: ${resultCode}`);

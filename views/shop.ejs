@@ -122,7 +122,7 @@
                             <img src="<%= item.media.id ? `/assets/${item.media.id}` : '/images/logo.png' %>" alt="<%= item.name %>" class="w-full h-32 object-cover rounded mb-2">
               <h4 class="text-lg font-semibold mb-1"><%= item.name %></h4>
               <p class="text-text-secondary text-sm mb-2 line-clamp-2 flex-grow"><%= item.description || 'High-quality construction material' %></p>
-              <p class="text-lg font-bold text-accent mb-2">$<%= parseFloat(item.price).toFixed(2) %></p>
+              <p class="text-lg font-bold text-accent mb-2"><%= parseFloat(item.price).toFixed(2) %> /=</p>
               <button data-id="<%= item.id %>" class="add-to-cart-btn bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-accent/90 transition w-full cursor-pointer">
                 <i class="fas fa-cart-plus mr-2"></i>Add to Cart
               </button>

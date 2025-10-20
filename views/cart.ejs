@@ -38,14 +38,14 @@
               <img src="<%= item.media.id || '/images/cart.png' %>" alt="<%= item.name %>" class="h-16 w-16 object-cover rounded" />
               <div>
                 <h3 class="text-lg font-semibold"><%= item.name %></h3>
-                <p class="item-price text-text-secondary">$<%= parseFloat(item.price).toFixed(2) %> each</p>
+                <p class="item-price text-text-secondary"><%= parseFloat(item.price).toFixed(2) %> /= each</p>
               </div>
             </div>
             <div class="flex items-center space-x-4 ml-4">
               <input type="number" min="1" value="<%= item.quantity || 1 %>" data-id="<%= item.order_id %>"
                 class="quantity-input w-16 border border-border rounded px-2 py-1 text-center" />
-          <span class="item-total font-bold">$<%= (item.total || 0).toFixed(2) %></span>
-              <button data-id="<%= item.order_id %>" class="remove-btn text-red-500 hover:underline">Remove</button>
+          <span class="item-total font-bold"><%= (item.total || 0).toFixed(2) %> /=</span>
+              <button data-id="<%= item.order_id %>" class="remove-btn text-red-500 hover:underline cursor-pointer">Remove</button>
             </div>
           </div>
         <% }) %>
@@ -53,7 +53,7 @@
       <div class="mt-8 bg-bg-secondary rounded-lg shadow p-4">
         <div class="flex flex-col space-y-4">
           <div class="flex justify-between items-center">
-            <span id="overall-total" class="text-xl font-bold">Total: $<%= cartItems.reduce((sum, item) => sum + (item.total || 0), 0).toFixed(2) %></span>
+            <span id="overall-total" class="text-xl font-bold">Total: <%= cartItems.reduce((sum, item) => sum + (item.total || 0), 0).toFixed(2) %> /=</span>
           </div>
           <div>
             <label for="phone" class="block mb-1 font-medium">Phone Number for Payment</label>
