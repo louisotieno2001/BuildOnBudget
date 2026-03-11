@@ -23,7 +23,7 @@ async function query(path, config) {
 // Shop route
 router.get('/', async (req, res) => {
     // Check if user is logged in
-    if (!req.session.user) {
+    if (!req.user) {
         return res.redirect('/login');
     }
     try {
@@ -31,19 +31,19 @@ router.get('/', async (req, res) => {
         const items = await resItems.json();
         // console.log('Shop items:', items.data ? items.data.slice(0, 2) : 'No data');
         // Fetch cart count (pending orders)
-        const resOrders = await query(`/items/orders?filter[user_id][_eq]=${req.session.user.id}&filter[status][_eq]=pending`);
+        const resOrders = await query(`/items/orders?filter[user_id][_eq]=${req.user.id}&filter[status][_eq]=pending`);
         const orders = await resOrders.json();
         const cartCount = orders.data ? orders.data.length : 0;
-        res.render('shop', { user: req.session.user, items: items.data || [], cartCount, directusToken: accessToken });
+        res.render('shop', { user: req.user, items: items.data || [], cartCount, directusToken: accessToken });
     } catch (error) {
         console.error('Error fetching shop items:', error);
-        res.render('shop', { user: req.session.user, items: [], cartCount: 0, directusToken: accessToken });
+        res.render('shop', { user: req.user, items: [], cartCount: 0, directusToken: accessToken });
     }
 });
 
 // Add to cart
 router.post('/add-to-cart', async (req, res) => {
-    if (!req.session.user) {
+    if (!req.user) {
         return res.status(401).json({ error: 'Not logged in' });
     }
     const { item_id, quantity } = req.body;
@@ -51,7 +51,7 @@ router.post('/add-to-cart', async (req, res) => {
     try {
         // Insert into orders collection with status pending
         const orderData = {
-            user_id: req.session.user.id,
+            user_id: req.user.id,
             product_id: item_id,
             status: 'pending',
             units: parseInt(quantity),

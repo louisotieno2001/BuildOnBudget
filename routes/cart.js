@@ -24,19 +24,19 @@ async function query(path, config) {
 // Cart route
 router.get('/', async (req, res) => {
     // Check if user is logged in
-    if (!req.session.user) {
+    if (!req.user) {
         return res.redirect('/login');
     }
     try {
         // console.log('User ID:', req.session.user.id);
         // Fetch pending orders for the user
-        const resOrders = await query(`/items/orders?filter[user_id]=${req.session.user.id}&filter[status]=pending&fields=id,user_id,product_id,status,units`);
+        const resOrders = await query(`/items/orders?filter[user_id]=${req.user.id}&filter[status]=pending&fields=id,user_id,product_id,status,units`);
         // console.log('Response status:', resOrders.status);
         const orders = await resOrders.json();
         // console.log('Orders response:', orders);
         // console.log('Fetched orders:', orders.data);
         if (!orders.data || orders.data.length === 0) {
-            return res.render('cart', { user: req.session.user, cartItems: [] });
+            return res.render('cart', { user: req.user, cartItems: [] });
         }
         // Fetch item details for the products in orders
         const itemIds = orders.data.map(o => o.product_id);
@@ -49,16 +49,16 @@ router.get('/', async (req, res) => {
             const qty = parseInt(o.units);
             return { ...item, quantity: qty, total: price * qty, order_id: o.id };
         }).filter(Boolean);
-        res.render('cart', { user: req.session.user, cartItems });
+        res.render('cart', { user: req.user, cartItems });
     } catch (error) {
         console.error('Error fetching cart items:', error);
-        res.render('cart', { user: req.session.user, cartItems: [] });
+        res.render('cart', { user: req.user, cartItems: [] });
     }
 });
 
 // Update cart quantity
 router.post('/update', async (req, res) => {
-    if (!req.session.user) {
+    if (!req.user) {
         return res.status(401).json({ error: 'Not logged in' });
     }
     const { order_id, quantity } = req.body;
@@ -85,12 +85,12 @@ router.post('/update', async (req, res) => {
 
 // Checkout - initiate M-Pesa STK Push
 router.post('/checkout', async (req, res) => {
-    if (!req.session.user) {
+    if (!req.user) {
         return res.status(401).json({ error: 'Not logged in' });
     }
     try {
         // Fetch pending orders for the user
-        const resOrders = await query(`/items/orders?filter[user_id]=${req.session.user.id}&filter[status]=pending&fields=id,user_id,product_id,status,units`);
+        const resOrders = await query(`/items/orders?filter[user_id]=${req.user.id}&filter[status]=pending&fields=id,user_id,product_id,status,units`);
         const orders = await resOrders.json();
         if (!orders.data || orders.data.length === 0) {
             return res.status(400).json({ error: 'Cart is empty' });
@@ -108,24 +108,32 @@ router.post('/checkout', async (req, res) => {
         }
 
         // Get phone number from request body, fallback to session
-        const phoneNumber = req.body.phone || req.session.user.phone;
+        const phoneNumber = req.body.phone || req.user.phone;
         if (!phoneNumber) {
             return res.status(400).json({ error: 'Phone number is required' });
         }
 
-        const accountReference = `Order-${req.session.user.id}-${Date.now()}`;
+        const accountReference = `Order-${req.user.id}-${Date.now()}`;
         const transactionDesc = 'Payment for BuildOnBudget order';
 
         const stkPushResponse = await initiateSTKPush(phoneNumber, totalAmount, accountReference, transactionDesc);
 
         // Store STK Push details in session or database for callback verification
-        req.session.pendingPayment = {
-            checkoutRequestId: stkPushResponse.CheckoutRequestID,
+        const pendingPaymentData = {
+            checkout_request_id: stkPushResponse.CheckoutRequestID,
+            user_id: req.user.id,
             orders: orders.data,
             items: items.data,
-            totalAmount,
-            accountReference
+            total_amount: totalAmount,
+            account_reference: accountReference,
+            phone: phoneNumber,
+            status: 'pending'
         };
+
+        await query('/items/pending_payments', {
+            method: 'POST',
+            body: JSON.stringify(pendingPaymentData)
+        });
 
         res.json({
             message: 'STK Push initiated. Please check your phone to complete payment.',

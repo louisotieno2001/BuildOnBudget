@@ -23,17 +23,17 @@ async function query(path, config) {
 // Budget route
 router.get('/', async (req, res) => {
     // Check if user is logged in
-    if (!req.session.user) {
+    if (!req.user) {
         return res.redirect('/login');
     }
     try {
-        const user_id = req.session.user.id;
+        const user_id = req.user.id;
         const resProjects = await query(`/items/projects?filter[user_id][_eq]=${user_id}`);
         const projects = await resProjects.json();
-        res.render('budget', { user: req.session.user, projects: projects.data || [] });
+        res.render('budget', { user: req.user, projects: projects.data || [] });
     } catch (error) {
         console.error('Error fetching projects:', error);
-        res.render('budget', { user: req.session.user, projects: [] });
+        res.render('budget', { user: req.user, projects: [] });
     }
 });
 

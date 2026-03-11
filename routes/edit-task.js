@@ -23,12 +23,12 @@ async function query(path, config) {
 // Edit Task route
 router.get('/:id', async (req, res) => {
     // Check if user is logged in
-    if (!req.session.user) {
+    if (!req.user) {
         return res.redirect('/login');
     }
     try {
         const taskId = req.params.id;
-        const user_id = req.session.user.id;
+        const user_id = req.user.id;
 
         // Fetch the task
         const resTask = await query(`/items/tasks/${taskId}?filter[user_id][_eq]=${user_id}`);
@@ -41,10 +41,10 @@ router.get('/:id', async (req, res) => {
         const resProjects = await query(`/items/projects?filter[user_id][_eq]=${user_id}`);
         const projects = await resProjects.json();
 
-        res.render('edit-tasks', { user: req.session.user, task: task.data, projects: projects.data || [] });
+        res.render('edit-tasks', { user: req.user, task: task.data, projects: projects.data || [] });
     } catch (error) {
         console.error('Error fetching task:', error);
-        res.render('edit-tasks', { user: req.session.user, task: null, projects: [] });
+        res.render('edit-tasks', { user: req.user, task: null, projects: [] });
     }
 });
 

@@ -49,13 +49,13 @@ async function fetchProjectById(projectId) {
 // Dashboard route
 router.get('/', async (req, res) => {
     // Check if user is logged in
-    if (!req.session.user) {
+    if (!req.user) {
         return res.redirect('/login');
     }
 
     // Fetch user projects
-    const userId = req.session.user.id;
-    const userEmail = req.session.user.email;
+    const userId = req.user.id;
+    const userEmail = req.user.email;
     const projects = await fetchUserProjects(userId);
 
     // Fetch tasks for each project
@@ -257,7 +257,7 @@ router.get('/', async (req, res) => {
     // Calculate pending notifications
     const pendingNotifications = teamsInvitedTo.filter(t => t.status === 'pending').length;
 
-    req.session.user.projects = projects;
+    const user = { ...req.user, projects };
 
     // Calculate project completion percentages for last 6 months
     const projectCompletionByMonth = {};
@@ -273,7 +273,7 @@ router.get('/', async (req, res) => {
 
     // Render dashboard with user data, projects, budgets, and teams
     res.render('dashboard', {
-        user: req.session.user,
+        user: user,
         projects: projects,
         invitedProjects: invitedProjects,
         budgets: budgets,
@@ -296,7 +296,7 @@ router.get('/', async (req, res) => {
 
 // Project details route
 router.get('/:id', async (req, res) => {
-    if (!req.session.user) {
+    if (!req.user) {
         return res.redirect('/login');
     }
 
@@ -308,12 +308,12 @@ router.get('/:id', async (req, res) => {
         return res.status(404).send('Project not found');
     }
 
-    res.render('project_details', { user: req.session.user, project: project });
+    res.render('project_details', { user: req.user, project: project });
 });
 
 // Orders route
 router.get('/orders', async (req, res) => {
-  if (!req.session.user) {
+  if (!req.user) {
     return res.status(401).json({ error: 'Not logged in' });
   }
   try {
@@ -325,7 +325,7 @@ router.get('/orders', async (req, res) => {
     } else {
       filter = `filter[status]=${status}`;
     }
-    const resOrders = await query(`/items/orders?filter[user_id]=${req.session.user.id}&${filter}&fields=id,user_id,product_id,status,units,amount_paid`);
+    const resOrders = await query(`/items/orders?filter[user_id]=${req.user.id}&${filter}&fields=id,user_id,product_id,status,units,amount_paid`);
     const orders = await resOrders.json();
     if (!orders.data) {
       return res.json([]);

@@ -117,6 +117,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Utility functions
 const utils = {
+  setAuthToken(token) {
+    if (!token) return;
+    localStorage.setItem('auth_token', token);
+  },
+
+  getAuthToken() {
+    return localStorage.getItem('auth_token');
+  },
+
+  authFetch(url, options = {}) {
+    const token = utils.getAuthToken();
+    const headers = new Headers(options.headers || {});
+    if (token) {
+      headers.set('Authorization', `Bearer ${token}`);
+    }
+    return fetch(url, { ...options, headers });
+  },
+
   showLoading(button) {
     const originalText = button.innerHTML;
     button.innerHTML = `

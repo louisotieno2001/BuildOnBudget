@@ -40,23 +40,55 @@ router.post('/callback', async (req, res) => {
                 const phoneNumber = callbackMetadata.find(item => item.Name === 'PhoneNumber').Value;
                 const amount = callbackMetadata.find(item => item.Name === 'Amount').Value;
 
-                // Here you would typically verify the checkoutRequestId against your stored session/database
-                // For now, we'll assume it's valid and process the order
+                const resPending = await query(`/items/pending_payments?filter[checkout_request_id][_eq]=${checkoutRequestId}&fields=*`);
+                const pending = await resPending.json();
+                const pendingPayment = pending && pending.data && pending.data[0];
 
-                // Note: In a real implementation, you'd need to retrieve the pending payment details
-                // from session or database using the checkoutRequestId
+                if (pendingPayment) {
+                    await query(`/items/pending_payments/${pendingPayment.id}`, {
+                        method: 'PATCH',
+                        body: JSON.stringify({
+                            status: 'completed',
+                            mpesa_receipt: mpesaReceiptNumber,
+                            transaction_date: String(transactionDate),
+                            amount,
+                            phone: String(phoneNumber)
+                        })
+                    });
 
-                // Since we don't have persistent storage in this example, we'll simulate order completion
-                // In production, you'd fetch the pending payment details and complete the orders
+                    if (pendingPayment.orders && Array.isArray(pendingPayment.orders)) {
+                        await Promise.all(
+                            pendingPayment.orders.map((order) =>
+                                query(`/items/orders/${order.id}`, {
+                                    method: 'PATCH',
+                                    body: JSON.stringify({
+                                        status: 'complete',
+                                        amount_paid: amount,
+                                        update_date: new Date().toISOString()
+                                    })
+                                })
+                            )
+                        );
+                    }
+                }
 
                 console.log(`Payment successful: Receipt ${mpesaReceiptNumber}, Amount: ${amount}`);
-
-                // TODO: Complete the order processing here
-                // This would involve updating orders to 'complete', subtracting units from shop, etc.
                 
             } else {
                 // Payment failed
                 console.log(`Payment failed with result code: ${resultCode}`);
+                const resPending = await query(`/items/pending_payments?filter[checkout_request_id][_eq]=${checkoutRequestId}&fields=id`);
+                const pending = await resPending.json();
+                const pendingPayment = pending && pending.data && pending.data[0];
+                if (pendingPayment) {
+                    await query(`/items/pending_payments/${pendingPayment.id}`, {
+                        method: 'PATCH',
+                        body: JSON.stringify({
+                            status: 'failed',
+                            failure_reason: stkCallback.ResultDesc || 'Payment failed'
+                        })
+                    });
+                }
             }
         }
 

@@ -23,12 +23,12 @@ async function query(path, config) {
 // Edit Budget route
 router.get('/:id', async (req, res) => {
     // Check if user is logged in
-    if (!req.session.user) {
+    if (!req.user) {
         return res.redirect('/login');
     }
     try {
         const budgetId = req.params.id;
-        const user_id = req.session.user.id;
+        const user_id = req.user.id;
 
         // Fetch the budget
         const resBudget = await query(`/items/budgets/${budgetId}?filter[user_id][_eq]=${user_id}`);
@@ -41,10 +41,10 @@ router.get('/:id', async (req, res) => {
         const resProjects = await query(`/items/projects?filter[user_id][_eq]=${user_id}`);
         const projects = await resProjects.json();
 
-        res.render('edit-budget', { user: req.session.user, budget: budget.data, projects: projects.data || [] });
+        res.render('edit-budget', { user: req.user, budget: budget.data, projects: projects.data || [] });
     } catch (error) {
         console.error('Error fetching budget:', error);
-        res.render('edit-budget', { user: req.session.user, budget: null, projects: [] });
+        res.render('edit-budget', { user: req.user, budget: null, projects: [] });
     }
 });
 

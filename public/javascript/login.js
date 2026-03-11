@@ -1,5 +1,7 @@
 /* eslint-disable no-undef */
 document.addEventListener('DOMContentLoaded', () => {
+  const authFetch = (window.utils && window.utils.authFetch) ? window.utils.authFetch : fetch;
+  const setAuthToken = (window.utils && window.utils.setAuthToken) ? window.utils.setAuthToken : () => {};
   const loginForm = document.getElementById('login-form');
 
   loginForm.addEventListener('submit', async e => {
@@ -14,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     try {
-      const res = await fetch('/login', {
+      const res = await authFetch('/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
@@ -26,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast(result.error || 'An error occurred during login', 'error');
       } else {
         showToast(result.message || 'Login successful!', 'success');
+        setAuthToken(result.token);
         // Redirect to dashboard or another page
         window.location.href = '/dashboard';
       }

@@ -2,21 +2,33 @@
 require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
-const session = require('express-session');
 const path = require('path');
-const { Pool } = require('pg');
-const pgSession = require('connect-pg-simple')(session);
 const cors = require('cors');
 const multer = require('multer');
 const upload = multer().single('attachments');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 
 // Declarations
 const app = express();
 const PORT = process.env.EXPRESS_PORT || 3000;
 const url = process.env.DIRECTUS_URL;
 const accessToken = process.env.DIRECTUS_TOKEN;
+const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret';
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
+const AUTH_COOKIE_NAME = 'auth_token';
+const DEFAULT_ALLOWED_ORIGINS = [
+  'http://localhost:8081',
+  'http://localhost:19000',
+  'exp://localhost:19000',
+  'http://localhost:3000',
+  'http://localhost:8055',
+];
+const allowedOrigins = process.env.CORS_ALLOWED_ORIGINS
+  ? process.env.CORS_ALLOWED_ORIGINS.split(',').map((origin) => origin.trim()).filter(Boolean)
+  : DEFAULT_ALLOWED_ORIGINS;
 
 // Proxy configuration
 const apiProxy = createProxyMiddleware({
@@ -27,44 +39,60 @@ const apiProxy = createProxyMiddleware({
     }
 });
 
-// Postgresql conf
-const pool = new Pool({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    database: process.env.DB_NAME,
-    port: process.env.DB_PORT,
-    ssl: { rejectUnauthorized: false },
-});
-
 // Middleware definitions
 app.use('/assets', apiProxy);
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(session({ secret: 'secret', resave: false, saveUninitialized: true }));
-app.use(cors());
 app.set('view engine', 'ejs');
-app.use(session({
-    store: new pgSession({
-        pool: pool,
-        tableName: 'session',
-    }),
-    secret: 'sqT_qxwhkalprcnS*4345khsags',
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        maxAge: 30 * 24 * 60 * 60 * 100
-    }
+app.use(cors({
+  origin: (origin, callback) => {
+    // Native mobile requests often omit Origin entirely.
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error(`CORS blocked for origin: ${origin}`));
+  },
+  credentials: true,
 }));
+
+const isProd = process.env.NODE_ENV === 'production';
+
+function signToken(user) {
+    return jwt.sign(
+        { id: user.id, email: user.email, name: user.name },
+        JWT_SECRET,
+        { expiresIn: JWT_EXPIRES_IN }
+    );
+}
+
+function attachUserFromToken(req, res, next) {
+    const authHeader = req.headers.authorization || '';
+    const bearerToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+    const cookieToken = req.cookies[AUTH_COOKIE_NAME];
+    const token = bearerToken || cookieToken;
+
+    if (!token) {
+        return next();
+    }
+
+    try {
+        const payload = jwt.verify(token, JWT_SECRET);
+        req.user = payload;
+    } catch (error) {
+        // Invalid token; ignore and continue.
+    }
+    return next();
+}
+
+app.use(attachUserFromToken);
 
 // Session check
 const checkSession = (req, res, next) => {
-    if (req.session.user) {
-        next()
-    } else {
-        res.redirect('/login')
+    if (req.user) {
+        return next();
     }
+    return res.status(401).json({ error: 'Unauthorized' });
 }
 
 // Query function to directus API endpoints
@@ -153,15 +181,35 @@ app.post('/signup', async (req, res) => {
             return res.status(400).json({error: 'Please fill all the fields'});
         }
 
+        const hashedPassword = await bcrypt.hash(password, 10);
         const userData = {
-            name, email, phone, password
+            name, email, phone, password: hashedPassword
         };
 
         const newUser = await signupUser(userData);
 
         console.log("Directus", newUser)
 
-        res.status(201).json({ message: 'User registered succesfully', user: newUser});
+        if (newUser && newUser.data && newUser.data.password) {
+            delete newUser.data.password;
+        }
+
+        const createdUser = newUser && newUser.data ? newUser.data : null;
+        const safeUser = createdUser
+            ? { id: createdUser.id, email: createdUser.email, name: createdUser.name, phone: createdUser.phone }
+            : null;
+        const token = safeUser ? signToken(safeUser) : undefined;
+
+        if (token) {
+            res.cookie(AUTH_COOKIE_NAME, token, {
+                httpOnly: true,
+                secure: isProd,
+                sameSite: isProd ? 'none' : 'lax',
+                maxAge: 7 * 24 * 60 * 60 * 1000,
+            });
+        }
+
+        res.status(201).json({ message: 'User registered succesfully', user: newUser, token });
     } catch (error) {
         console.error('Error inserting user', error);
         res.status(500).json({ error: 'Internal server error' });
@@ -170,7 +218,7 @@ app.post('/signup', async (req, res) => {
 
 async function loginUser(email) {
     try {
-        const res = await query(`/items/users?filter[email][_eq]=${email}`, {
+        const res = await query(`/items/users?filter[email][_eq]=${email}&fields=*`, {
             method: 'GET',
         });
 
@@ -180,6 +228,17 @@ async function loginUser(email) {
     } catch (error) {
         console.error('Error querying user data:', error);
         throw new Error('Error querying user data')
+    }
+}
+
+async function updateUserPassword(userId, hashedPassword) {
+    try {
+        await query(`/items/users/${userId}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ password: hashedPassword })
+        });
+    } catch (error) {
+        console.error('Error upgrading password hash:', error);
     }
 }
 
@@ -198,9 +257,32 @@ app.post('/login', async(req, res) => {
         }
 
         const user = users.data[0];
+        const storedPassword = user.password || '';
 
-        req.session.user = user;
-        return res.status(200).json({ message: 'Login successful', redirect: '/dashboard'})
+        const isBcrypt = typeof storedPassword === 'string' && storedPassword.startsWith('$2');
+        const passwordMatches = isBcrypt
+            ? await bcrypt.compare(password, storedPassword)
+            : storedPassword === password;
+
+        if (!passwordMatches) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        if (!isBcrypt) {
+            const upgraded = await bcrypt.hash(password, 10);
+            await updateUserPassword(user.id, upgraded);
+        }
+
+        const safeUser = { id: user.id, email: user.email, name: user.name, phone: user.phone };
+
+        const token = signToken(safeUser);
+        res.cookie(AUTH_COOKIE_NAME, token, {
+            httpOnly: true,
+            secure: isProd,
+            sameSite: isProd ? 'none' : 'lax',
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+        return res.status(200).json({ message: 'Login successful', token, redirect: '/dashboard'})
     } catch (error) {
         console.error('Error during login:', error);
         res.status(500).json({ error: 'Internal server error' });
@@ -209,19 +291,9 @@ app.post('/login', async(req, res) => {
 
 app.get('/logout', async (req, res) => {
   try {
-    // Destroy the session
-    req.session.destroy((err) => {
-      if (err) {
-        console.error('Error destroying session:', err);
-        return res.status(500).send('Error logging out');
-      }
-
-      // Clear the session cookie
-      res.clearCookie('connect.sid');
-
-      // Redirect to home page
-      return res.redirect('/');
-    });
+    res.clearCookie('connect.sid');
+    res.clearCookie(AUTH_COOKIE_NAME);
+    return res.redirect('/');
   } catch (error) {
     console.error('Logout error:', error);
     res.status(500).send('Server error during logout');
@@ -244,11 +316,11 @@ async function createTask(taskData) {
     return await res.json();
 }
 
-app.post('/new-project', upload, async (req, res) => {
+app.post('/new-project', checkSession, upload, async (req, res) => {
     try {
         const { name, type, client_name, client_contact, location, description, budget, start_date, end_date, materials, contractors, permits, safety } = req.body;
 
-        const user_id = req.session.user.id;
+        const user_id = req.user.id;
 
         if (!name || !type || !location || !budget || !start_date) {
             return res.status(400).json({ error: 'Please fill in all required fields' });
@@ -293,11 +365,11 @@ app.post('/new-project', upload, async (req, res) => {
     }
 });
 
-app.post('/new-task', async (req, res) => {
+app.post('/new-task', checkSession, async (req, res) => {
     try {
         const { project_id, name, description, assigned_to, start_date, end_date, priority, status } = req.body;
 
-        const user_id = req.session.user.id;
+        const user_id = req.user.id;
 
         if (!project_id || !name) {
             return res.status(400).json({ error: 'Please fill in required fields' });
@@ -384,7 +456,7 @@ app.post('/edit-task/:id', checkSession, async (req, res) => {
         const taskId = req.params.id;
         const { project_id, name, description, assigned_to, start_date, end_date, priority, status } = req.body;
 
-        const user_id = req.session.user.id;
+        const user_id = req.user.id;
 
         if (!project_id || !name) {
             return res.status(400).json({ error: 'Please fill in required fields' });
@@ -419,7 +491,7 @@ app.post('/edit-task/:id', checkSession, async (req, res) => {
 
 app.post('/update-user', checkSession, async (req, res) => {
     try {
-        const userId = req.session.user.id;
+        const userId = req.user.id;
         const { name, phone, profile_image } = req.body;
 
         const updateData = {};
@@ -433,8 +505,6 @@ app.post('/update-user', checkSession, async (req, res) => {
         });
 
         if (resUpdate.ok) {
-            // Update session
-            req.session.user = { ...req.session.user, ...updateData };
             res.status(200).json({ message: 'User updated successfully' });
         } else {
             res.status(500).json({ error: 'Failed to update user' });
@@ -450,7 +520,7 @@ app.post('/edit-budget/:id', checkSession, async (req, res) => {
         const budgetId = req.params.id;
         const { project_id, totalBudget, components } = req.body;
 
-        const user_id = req.session.user.id;
+        const user_id = req.user.id;
 
         if (!project_id || !totalBudget) {
             return res.status(400).json({ error: 'Please fill in required fields' });
@@ -482,7 +552,7 @@ app.post('/invite-member', checkSession, async (req, res) => {
     try {
         const { project_id, email, role } = req.body;
 
-        const user_id = req.session.user.id;
+        const user_id = req.user.id;
 
         if (!project_id || !email || !role) {
             return res.status(400).json({ error: 'Please fill in all required fields' });
@@ -514,10 +584,10 @@ app.post('/invite-member', checkSession, async (req, res) => {
 
 app.post('/budget', async (req, res) => {
     try {
-        if (!req.session.user) {
+        if (!req.user) {
             return res.status(401).json({ error: 'Unauthorized' });
         }
-        const user_id = req.session.user.id;
+        const user_id = req.user.id;
         const { projectId, totalBudget, components } = req.body;
 
         if (!projectId || !totalBudget || !components || !Array.isArray(components)) {
@@ -568,5 +638,5 @@ app.delete('/budget/:id', checkSession, async (req, res) => {
 
 // Start the server
 app.listen(PORT, () => {
-    console.log(`Server listening on port ${PORT}`);
+    console.log(`Server listening on http://localhost:${PORT}`);
 });

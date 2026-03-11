@@ -1,4 +1,6 @@
 
+const authFetch = (window.utils && window.utils.authFetch) ? window.utils.authFetch : fetch;
+
 function updateTotal() {
     const cartItems = document.querySelectorAll('.cart-item');
     let total = 0;
@@ -17,7 +19,7 @@ document.querySelectorAll('.quantity-input').forEach(input => {
         const quantity = parseInt(input.value);
         if (quantity < 1) return;
         try {
-            const response = await fetch('/cart/update', {
+            const response = await authFetch('/cart/update', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ order_id: orderId, quantity })
@@ -44,7 +46,7 @@ document.querySelectorAll('.remove-btn').forEach(button => {
     button.addEventListener('click', async () => {
         const orderId = button.getAttribute('data-id');
         try {
-            const response = await fetch('/cart/update', {
+            const response = await authFetch('/cart/update', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ order_id: orderId, quantity: 0 })
@@ -82,7 +84,7 @@ document.getElementById('checkout-btn')?.addEventListener('click', async () => {
     button.disabled = true;
     button.textContent = 'Processing...';
     try {
-        const response = await fetch('/cart/checkout', {
+        const response = await authFetch('/cart/checkout', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ phone: phoneValue })

@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
+    const authFetch = (window.utils && window.utils.authFetch) ? window.utils.authFetch : fetch;
     const form = document.getElementById('new-project-form');
 
     form.addEventListener('submit', async (e) => {
@@ -44,7 +45,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         try {
-            const response = await fetch('/new-project', {
+            const response = await authFetch('/new-project', {
                 method: 'POST',
                 body: formData
             });

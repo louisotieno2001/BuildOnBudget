@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
+  const authFetch = (window.utils && window.utils.authFetch) ? window.utils.authFetch : fetch;
   const searchInput = document.getElementById('search');
   const categorySelect = document.getElementById('category');
   const subcategorySelect = document.getElementById('subcategory');
@@ -64,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function() {
         button.disabled = true;
         button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Adding...';
         try {
-          const response = await fetch('/shop/add-to-cart', {
+          const response = await authFetch('/shop/add-to-cart', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ item_id: itemId, quantity: 1 })
