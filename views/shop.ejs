@@ -117,9 +117,13 @@
 
         <!-- Items Grid -->
         <div id="items-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          <% items.forEach(item => { %>
+          <% items.forEach(item => { 
+              const mediaValue = item.media;
+              const mediaId = (mediaValue && mediaValue.id) || (Array.isArray(mediaValue) ? ((mediaValue[0] && mediaValue[0].id) || mediaValue[0]) : mediaValue);
+              const mediaUrl = item.media_url || (mediaId ? `/assets/${mediaId}` : null);
+          %>
             <div class="bg-bg-secondary rounded-xl p-4 shadow hover:shadow-lg transition flex flex-col" data-name="<%= item.name %>" data-description="<%= item.description || '' %>" data-category="<%= item.category || '' %>" data-subcategory="<%= item.sub_category || '' %>">
-                            <img src="<%= item.media.id ? `/assets/${item.media.id}` : '/images/logo.png' %>" alt="<%= item.name %>" class="w-full h-32 object-cover rounded mb-2">
+                            <img src="<%= mediaUrl || '/images/logo.png' %>" alt="<%= item.name %>" class="w-full h-32 object-cover rounded mb-2">
               <h4 class="text-lg font-semibold mb-1"><%= item.name %></h4>
               <p class="text-text-secondary text-sm mb-2 line-clamp-2 flex-grow"><%= item.description || 'High-quality construction material' %></p>
               <p class="text-lg font-bold text-accent mb-2"><%= parseFloat(item.price).toFixed(2) %> /=</p>

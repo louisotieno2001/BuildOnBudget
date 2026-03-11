@@ -24,7 +24,7 @@ async function query(path, config) {
 router.post('/callback', async (req, res) => {
     try {
         const callbackData = req.body;
-        console.log('M-Pesa Callback:', JSON.stringify(callbackData, null, 2));
+        // console.log('M-Pesa Callback:', JSON.stringify(callbackData, null, 2));
 
         // Check if payment was successful
         if (callbackData.Body && callbackData.Body.stkCallback) {
@@ -72,11 +72,11 @@ router.post('/callback', async (req, res) => {
                     }
                 }
 
-                console.log(`Payment successful: Receipt ${mpesaReceiptNumber}, Amount: ${amount}`);
+                // console.log(`Payment successful: Receipt ${mpesaReceiptNumber}, Amount: ${amount}`);
                 
             } else {
                 // Payment failed
-                console.log(`Payment failed with result code: ${resultCode}`);
+                // console.log(`Payment failed with result code: ${resultCode}`);
                 const resPending = await query(`/items/pending_payments?filter[checkout_request_id][_eq]=${checkoutRequestId}&fields=id`);
                 const pending = await resPending.json();
                 const pendingPayment = pending && pending.data && pending.data[0];

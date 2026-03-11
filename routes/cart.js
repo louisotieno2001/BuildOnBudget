@@ -28,6 +28,29 @@ router.get('/', async (req, res) => {
         return res.redirect('/login');
     }
     try {
+        const wantsJson = req.query.format === 'json' || req.headers.accept?.includes('application/json');
+        const buildOrdersWithProducts = async (status) => {
+            const resOrdersByStatus = await query(
+                `/items/orders?filter[user_id][_eq]=${req.user.id}&filter[status][_eq]=${status}&fields=id,user_id,product_id,status,units,amount_paid, update_date, delivered_date`
+            );
+            const statusPayload = await resOrdersByStatus.json();
+            if (!statusPayload.data || statusPayload.data.length === 0) {
+                return [];
+            }
+            const productIds = statusPayload.data.map(o => o.product_id);
+            const resProducts = await query(`/items/shop?filter[id][_in]=${productIds.join(',')}&fields=id,name,description,price,media.*`);
+            const productsPayload = await resProducts.json();
+            const productMap = {};
+            if (productsPayload.data) {
+                productsPayload.data.forEach(p => {
+                    productMap[p.id] = p;
+                });
+            }
+            return statusPayload.data.map(o => ({
+                ...o,
+                product: productMap[o.product_id] || null
+            })).filter(o => o.product);
+        };
         // console.log('User ID:', req.session.user.id);
         // Fetch pending orders for the user
         const resOrders = await query(`/items/orders?filter[user_id]=${req.user.id}&filter[status]=pending&fields=id,user_id,product_id,status,units`);
@@ -35,23 +58,37 @@ router.get('/', async (req, res) => {
         const orders = await resOrders.json();
         // console.log('Orders response:', orders);
         // console.log('Fetched orders:', orders.data);
-        if (!orders.data || orders.data.length === 0) {
+        let cartItems = [];
+        if (orders.data && orders.data.length > 0) {
+            // Fetch item details for the products in orders
+            const itemIds = orders.data.map(o => o.product_id);
+            const resItems = await query(`/items/shop?filter[id][_in]=${itemIds.join(',')}&fields=*,media.*`);
+            const items = await resItems.json();
+            cartItems = orders.data.map(o => {
+                const item = items.data.find(i => i.id == o.product_id);
+                if (!item) return null; // Skip if item not found
+                const price = parseFloat(item.price);
+                const qty = parseInt(o.units);
+                return { ...item, quantity: qty, total: price * qty, order_id: o.id };
+            }).filter(Boolean);
+        }
+        if (wantsJson) {
+            const [ongoingOrders, deliveredOrders] = await Promise.all([
+                buildOrdersWithProducts('complete'),
+                buildOrdersWithProducts('delivered')
+            ]);
+            return res.json({ cartItems, ongoingOrders, deliveredOrders });
+        }
+        if (!cartItems.length) {
             return res.render('cart', { user: req.user, cartItems: [] });
         }
-        // Fetch item details for the products in orders
-        const itemIds = orders.data.map(o => o.product_id);
-        const resItems = await query(`/items/shop?filter[id][_in]=${itemIds.join(',')}`);
-        const items = await resItems.json();
-        const cartItems = orders.data.map(o => {
-            const item = items.data.find(i => i.id == o.product_id);
-            if (!item) return null; // Skip if item not found
-            const price = parseFloat(item.price);
-            const qty = parseInt(o.units);
-            return { ...item, quantity: qty, total: price * qty, order_id: o.id };
-        }).filter(Boolean);
         res.render('cart', { user: req.user, cartItems });
     } catch (error) {
         console.error('Error fetching cart items:', error);
+        const wantsJson = req.query.format === 'json' || req.headers.accept?.includes('application/json');
+        if (wantsJson) {
+            return res.json({ cartItems: [], ongoingOrders: [], deliveredOrders: [] });
+        }
         res.render('cart', { user: req.user, cartItems: [] });
     }
 });
@@ -97,7 +134,7 @@ router.post('/checkout', async (req, res) => {
         }
         // Fetch item details
         const itemIds = orders.data.map(o => o.product_id);
-        const resItems = await query(`/items/shop?filter[id][_in]=${itemIds.join(',')}`);
+        const resItems = await query(`/items/shop?filter[id][_in]=${itemIds.join(',')}&fields=*,media.*`);
         const items = await resItems.json();
 
         // Calculate total amount

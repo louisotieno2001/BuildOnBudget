@@ -25,29 +25,43 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        const formData = new FormData();
-        formData.append('name', projectName);
-        formData.append('type', projectType);
-        formData.append('client_name', clientName);
-        formData.append('client_contact', clientContact);
-        formData.append('location', projectLocation);
-        formData.append('description', projectDescription);
-        formData.append('budget', projectBudget);
-        formData.append('start_date', projectStartDate);
-        formData.append('end_date', projectEndDate);
-        formData.append('materials', materials);
-        formData.append('contractors', contractors);
-        formData.append('permits', permits);
-        formData.append('safety', safety);
+        const payload = {
+            name: projectName,
+            type: projectType,
+            client_name: clientName,
+            client_contact: clientContact,
+            location: projectLocation,
+            description: projectDescription,
+            budget: projectBudget,
+            start_date: projectStartDate,
+            end_date: projectEndDate,
+            materials,
+            contractors,
+            permits,
+            safety,
+            attachment_name: null,
+            attachment_type: null,
+            attachment_base64: null
+        };
+
         const attachment = document.getElementById('attachments').files[0];
         if (attachment) {
-            formData.append('attachments', attachment);
+            payload.attachment_name = attachment.name;
+            payload.attachment_type = attachment.type || 'application/octet-stream';
+            const dataUrl = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onerror = () => reject(new Error('Failed to read attachment'));
+                reader.onload = () => resolve(reader.result);
+                reader.readAsDataURL(attachment);
+            });
+            payload.attachment_base64 = typeof dataUrl === 'string' ? dataUrl.split(',')[1] : null;
         }
 
         try {
             const response = await authFetch('/new-project', {
                 method: 'POST',
-                body: formData
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
             });
 
             if (response.ok) {

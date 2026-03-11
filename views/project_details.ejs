@@ -77,11 +77,15 @@
               <p class="text-text-secondary text-sm md:text-base"><%= project.safety %></p>
             </div>
           </div>
-          <% if (project.media) { %>
+          <% if (project.attachment_base64) { %>
           <div>
             <h3 class="text-lg md:text-xl font-semibold mb-2">Attachments</h3>
             <div class="bg-bg-secondary p-4 rounded-lg shadow-sm">
-              <iframe src="/assets/<%= project.media %>" width="100%" height="600px"></iframe>
+              <% if (project.attachment_type && project.attachment_type.startsWith('image/')) { %>
+              <img src="/projects/<%= project.id %>/attachment" alt="Project attachment" class="w-full max-h-[700px] object-contain" />
+              <% } else { %>
+              <iframe src="/projects/<%= project.id %>/attachment" width="100%" height="600px"></iframe>
+              <% } %>
             </div>
           </div>
           <% } %>

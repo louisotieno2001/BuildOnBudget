@@ -4,8 +4,6 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
 const cors = require('cors');
-const multer = require('multer');
-const upload = multer().single('attachments');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
@@ -42,8 +40,8 @@ const apiProxy = createProxyMiddleware({
 // Middleware definitions
 app.use('/assets', apiProxy);
 app.use(cookieParser());
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true, limit: '25mb' }));
+app.use(bodyParser.json({ limit: '25mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 app.use(cors({
@@ -112,25 +110,14 @@ async function query(path, config) {
     }
 }
 
-// Assets API
-async function uploadToDirectus(file) {
-    const formData = new FormData();
-    const blob = new Blob([file.buffer], { type: file.mimetype });
-    formData.append('file', blob, file.originalname);
-    try {
-        const res = await fetch(`${url}/files`, {
-            method: 'POST',
-            headers: {
-                "Authorization": `Bearer ${accessToken}`,
-            },
-            body: formData
-        });
-        const uploadedAsset = await res.json();
-        return uploadedAsset;
-    } catch (error) {
-        console.error('Error uploading to directus', error);
-        throw new Error('Failed to upload file')
+function normalizeBase64Payload(payload) {
+    if (!payload || typeof payload !== 'string') return null;
+    const trimmed = payload.trim();
+    const commaIndex = trimmed.indexOf(',');
+    if (trimmed.startsWith('data:') && commaIndex !== -1) {
+        return trimmed.slice(commaIndex + 1);
     }
+    return trimmed;
 }
 
 // Route definitions
@@ -175,7 +162,7 @@ app.post('/signup', async (req, res) => {
     try {
         const { name, email, phone, password } = req.body;
 
-        console.log('Userdata', req.body)
+        // console.log('Userdata', req.body)
 
         if(!name || !email || !phone || !password){
             return res.status(400).json({error: 'Please fill all the fields'});
@@ -188,7 +175,7 @@ app.post('/signup', async (req, res) => {
 
         const newUser = await signupUser(userData);
 
-        console.log("Directus", newUser)
+        // console.log("Directus", newUser)
 
         if (newUser && newUser.data && newUser.data.password) {
             delete newUser.data.password;
@@ -316,9 +303,26 @@ async function createTask(taskData) {
     return await res.json();
 }
 
-app.post('/new-project', checkSession, upload, async (req, res) => {
+app.post('/new-project', checkSession, async (req, res) => {
     try {
-        const { name, type, client_name, client_contact, location, description, budget, start_date, end_date, materials, contractors, permits, safety } = req.body;
+        const {
+            name,
+            type,
+            client_name,
+            client_contact,
+            location,
+            description,
+            budget,
+            start_date,
+            end_date,
+            materials,
+            contractors,
+            permits,
+            safety,
+            attachment_name,
+            attachment_type,
+            attachment_base64
+        } = req.body;
 
         const user_id = req.user.id;
 
@@ -326,16 +330,7 @@ app.post('/new-project', checkSession, upload, async (req, res) => {
             return res.status(400).json({ error: 'Please fill in all required fields' });
         }
 
-        const attachment = req.file;
-        let attachmentId = null;
-        if (attachment) {
-            try {
-                const uploaded = await uploadToDirectus(attachment);
-                attachmentId = uploaded.data.id;
-            } catch (err) {
-                console.error('Error uploading file:', err);
-            }
-        }
+        const normalizedBase64 = normalizeBase64Payload(attachment_base64);
 
         const projectData = {
             name,
@@ -351,7 +346,9 @@ app.post('/new-project', checkSession, upload, async (req, res) => {
             contractors,
             permits,
             safety,
-            media: attachmentId,
+            attachment_name: attachment_name || null,
+            attachment_type: attachment_type || null,
+            attachment_base64: normalizedBase64 || null,
             status: false,
             user_id: user_id
         };
@@ -362,6 +359,37 @@ app.post('/new-project', checkSession, upload, async (req, res) => {
     } catch (error) {
         console.error('Error creating project', error);
         res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+app.get('/projects/:id/attachment', checkSession, async (req, res) => {
+    try {
+        const projectId = req.params.id;
+        const resProject = await query(`/items/projects/${projectId}?fields=attachment_base64,attachment_name,attachment_type,user_id`, {
+            method: 'GET',
+        });
+        if (!resProject.ok) {
+            return res.status(404).send('Project not found');
+        }
+        const project = await resProject.json();
+        const data = project && project.data ? project.data : null;
+        if (!data || data.user_id !== req.user.id) {
+            return res.status(404).send('Attachment not found');
+        }
+        if (!data.attachment_base64) {
+            return res.status(404).send('Attachment not found');
+        }
+
+        const buffer = Buffer.from(data.attachment_base64, 'base64');
+        const contentType = data.attachment_type || 'application/octet-stream';
+        const fileName = data.attachment_name || `project-${projectId}-attachment`;
+
+        res.setHeader('Content-Type', contentType);
+        res.setHeader('Content-Disposition', `inline; filename="${fileName}"`);
+        return res.status(200).send(buffer);
+    } catch (error) {
+        console.error('Error fetching project attachment', error);
+        res.status(500).send('Internal server error');
     }
 });
 
@@ -395,6 +423,7 @@ app.post('/new-task', checkSession, async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+
 
 app.patch('/task/:id', checkSession, async (req, res) => {
     try {

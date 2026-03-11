@@ -32,10 +32,13 @@
       <p class="text-text-secondary text-center">Your cart is empty. <a href="/shop" class="text-accent">Shop now</a></p>
     <% } else { %>
       <div class="space-y-4">
-        <% cartItems.forEach(item => { %>
+        <% cartItems.forEach(item => { 
+             const mediaValue = item.media;
+             const mediaId = (mediaValue && mediaValue.id) || (Array.isArray(mediaValue) ? ((mediaValue[0] && mediaValue[0].id) || mediaValue[0]) : mediaValue);
+        %>
           <div class="cart-item bg-bg-secondary rounded-lg shadow p-4 flex flex-col md:flex-row md:items-center md:justify-between">
             <div class="flex items-center space-x-4 mb-4 md:mb-0">
-              <img src="<%= item.media.id || '/images/cart.png' %>" alt="<%= item.name %>" class="h-16 w-16 object-cover rounded" />
+              <img src="<%= mediaId ? `/assets/${mediaId}` : '/images/cart.png' %>" alt="<%= item.name %>" class="h-16 w-16 object-cover rounded" />
               <div>
                 <h3 class="text-lg font-semibold"><%= item.name %></h3>
                 <p class="item-price text-text-secondary"><%= parseFloat(item.price).toFixed(2) %> /= each</p>

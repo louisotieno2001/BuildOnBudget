@@ -22,7 +22,7 @@ async function query(path, config) {
 
 async function fetchUserProjects(userId) {
     try {
-        const res = await query(`/items/projects?filter[user_id][_eq]=${userId}`, {
+        const res = await query(`/items/projects?filter[user_id][_eq]=${userId}&fields=id,name,description,budget,start_date,deadline,status`, {
             method: 'GET',
         });
         const projects = await res.json();
@@ -31,6 +31,16 @@ async function fetchUserProjects(userId) {
         console.error('Error fetching user projects:', error);
         throw new Error('Failed to fetch projects');
     }
+}
+
+function setProjectActiveFlag(project) {
+    if (!project || !Array.isArray(project.tasks)) {
+        project.is_active = true;
+        return;
+    }
+    const hasTasks = project.tasks.length > 0;
+    const allComplete = hasTasks && project.tasks.every((task) => task.status === 'completed');
+    project.is_active = !allComplete;
 }
 
 async function fetchProjectById(projectId) {
@@ -64,9 +74,11 @@ router.get('/', async (req, res) => {
             const resTasks = await query(`/items/tasks?filter[project_id][_eq]=${project.id}`);
             const tasks = await resTasks.json();
             project.tasks = tasks.data || [];
+            setProjectActiveFlag(project);
         } catch (error) {
             console.error('Error fetching tasks for project:', project.id, error);
             project.tasks = [];
+            setProjectActiveFlag(project);
         }
     }
 
@@ -129,7 +141,7 @@ router.get('/', async (req, res) => {
             const projectQuery = projectIds.map(id => `filter[id][_in]=${id}`).join('&');
             const resAllProjects = await query(`/items/projects?${projectQuery}&fields=id,name,user_id,budget,description`);
             const allProjects = await resAllProjects.json();
-            console.log(allProjects)
+            // console.log(allProjects)
             allProjects.data.forEach(p => projectMap[p.id] = p);
         } catch (error) {
             console.error('Error fetching projects for teams:', error);
@@ -156,9 +168,11 @@ router.get('/', async (req, res) => {
             const resTasks = await query(`/items/tasks?filter[project_id][_eq]=${item.project.id}`);
             const tasks = await resTasks.json();
             item.project.tasks = tasks.data || [];
+            setProjectActiveFlag(item.project);
         } catch (error) {
             console.error('Error fetching tasks for invited project:', item.project.id, error);
             item.project.tasks = [];
+            setProjectActiveFlag(item.project);
         }
     }
 
@@ -271,6 +285,30 @@ router.get('/', async (req, res) => {
         });
     });
 
+    const wantsJson = req.query.format === 'json' || req.headers.accept?.includes('application/json');
+    if (wantsJson) {
+        return res.json({
+            user,
+            projects,
+            invitedProjects,
+            budgets,
+            teamsByYou,
+            teamsInvitedTo,
+            pendingNotifications,
+            activeProjects,
+            tasksDue,
+            budgetSpent,
+            teamMembers,
+            taskStatusCounts,
+            monthlyTasksLabels,
+            monthlyTasksData,
+            projectCompletionByMonth,
+            shopItems,
+            ongoingOrders,
+            deliveredOrders
+        });
+    }
+
     // Render dashboard with user data, projects, budgets, and teams
     res.render('dashboard', {
         user: user,
@@ -301,8 +339,38 @@ router.get('/:id', async (req, res) => {
     }
 
     const projectId = req.params.id;
+    const wantsJson = req.query.format === 'json' || req.headers.accept?.includes('application/json');
+
+    if (wantsJson) {
+        try {
+            const userId = req.user.id;
+            const resProject = await query(`/items/projects/${projectId}?filter[user_id][_eq]=${userId}&fields=id,name,description,budget,start_date,deadline,status,client_name,client_contact,location,materials,contractors,permits,safety,attachment_name,attachment_type`, {
+                method: 'GET',
+            });
+            const projectPayload = await resProject.json();
+            if (!projectPayload.data) {
+                return res.status(404).json({ error: 'Project not found' });
+            }
+            try {
+                const resTasks = await query(`/items/tasks?filter[project_id][_eq]=${projectId}&fields=id,name,description,assigned_to,start_date,end_date,priority,status`);
+                const tasksPayload = await resTasks.json();
+                projectPayload.data.tasks = tasksPayload.data || [];
+                setProjectActiveFlag(projectPayload.data);
+                const resBudgets = await query(`/items/budgets?filter[project_id][_eq]=${projectId}&fields=id,totalBudget,components`);
+                const budgetsPayload = await resBudgets.json();
+                projectPayload.data.budgets = budgetsPayload.data || [];
+            } catch (taskError) {
+                console.error('Error fetching project tasks:', taskError);
+            }
+            return res.json(projectPayload.data);
+        } catch (error) {
+            console.error('Error fetching project:', error);
+            return res.status(500).json({ error: 'Failed to fetch project' });
+        }
+    }
+
     const project = await fetchProjectById(projectId);
-    console.log('Fetched project:', project);
+    // console.log('Fetched project:', project);
 
     if (!project) {
         return res.status(404).send('Project not found');
