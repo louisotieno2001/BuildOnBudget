@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const url = process.env.DIRECTUS_URL;
 const accessToken = process.env.DIRECTUS_TOKEN;
+const { normalizeMediaUrl } = require('../utils/media');
 
 // Query function to directus API endpoints
 async function query(path, config) {
@@ -31,30 +32,13 @@ router.get('/', async (req, res) => {
         return res.redirect('/login');
     }
     try {
-        const resItems = await query('/items/shop?fields=*,media.*');
+        const assetBaseUrl = `${req.protocol}://${req.get('host')}`;
+        const resItems = await query('/items/shop?fields=*');
         const items = await resItems.json();
-        console.log('Shop media sample:', items.data ? items.data.slice(0, 2).map(item => item.media) : 'No data');
-        const mediaIds = (items.data || [])
-            .map(item => item.media)
-            .filter(Boolean);
-        let mediaMap = {};
-        if (mediaIds.length > 0) {
-            const resFiles = await query(`/files?filter[id][_in]=${mediaIds.join(',')}&fields=id,filename_disk,type,storage`);
-            const filesPayload = await resFiles.json();
-            if (filesPayload.data) {
-                filesPayload.data.forEach(file => {
-                    mediaMap[file.id] = file;
-                });
-            }
-        }
-        const enrichedItems = (items.data || []).map(item => {
-            const mediaId = item.media;
-            return {
-                ...item,
-                media_file: mediaMap[mediaId] || null,
-                media_url: mediaId ? `/assets/${mediaId}` : null
-            };
-        });
+        const enrichedItems = (items.data || []).map(item => ({
+            ...item,
+            media_url: normalizeMediaUrl(item.media, { baseUrl: assetBaseUrl })
+        }));
         // Fetch cart count (pending orders)
         const resOrders = await query(`/items/orders?filter[user_id][_eq]=${req.user.id}&filter[status][_eq]=pending`);
         const orders = await resOrders.json();

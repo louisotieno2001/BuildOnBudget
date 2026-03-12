@@ -8,6 +8,7 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const { normalizeMediaUrl } = require('./utils/media');
 
 // Declarations
 const app = express();
@@ -30,20 +31,88 @@ const allowedOrigins = process.env.CORS_ALLOWED_ORIGINS
 
 // Proxy configuration
 const apiProxy = createProxyMiddleware({
-    target: 'http://0.0.0.0:8055/assets', // Target server where requests should be proxied
-    changeOrigin: true, // Adjust the origin of the request to the target
-    headers: {
-        "Authorization": "Bearer "+accessToken
+    target: 'http://directus:8055', // Directus Docker service hostname
+    changeOrigin: true,
+    pathRewrite: {
+        '^/assets': '/assets' // Keep /assets prefix for Directus
+    },
+    onProxyReq: (proxyReq, req, res) => {
+        // Add authorization header
+        proxyReq.setHeader('Authorization', 'Bearer ' + accessToken);
+    }
+});
+
+// Guard: if a raw Directus file ID is requested without /assets, redirect it.
+app.get('/:fileId', (req, res, next) => {
+    const fileId = req.params.fileId;
+    if (!/^[0-9a-fA-F-]{36}$/.test(fileId)) {
+        return next();
+    }
+    const referer = req.get('referer') || 'unknown';
+    const userAgent = req.get('user-agent') || 'unknown';
+    console.warn(`Redirecting raw file id request to /assets/${fileId} (referer: ${referer}, ua: ${userAgent})`);
+    return res.redirect(302, `/assets/${fileId}`);
+});
+
+// Custom route to serve Directus files from the uploads folder.
+// Falls back to the proxy if no local match is found.
+app.get('/assets/:filename', async (req, res, next) => {
+    const filename = req.params.filename;
+    const uploadsPath = '/directus/uploads';
+    
+    try {
+        // Try to find the file by ID (filename_disk)
+        const fs = require('fs');
+        const path = require('path');
+        
+        // List files in the uploads directory
+        const files = fs.readdirSync(uploadsPath);
+        
+        // Find file that starts with the requested filename
+        const matchedFile = files.find(f => f.startsWith(filename));
+        
+        if (matchedFile) {
+            const filePath = path.join(uploadsPath, matchedFile);
+            const stat = fs.statSync(filePath);
+            
+            // Determine content type from extension
+            const ext = path.extname(matchedFile).toLowerCase();
+            const contentTypes = {
+                '.jpg': 'image/jpeg',
+                '.jpeg': 'image/jpeg',
+                '.png': 'image/png',
+                '.gif': 'image/gif',
+                '.webp': 'image/webp',
+                '.avif': 'image/avif',
+                '.svg': 'image/svg+xml',
+                '.pdf': 'application/pdf'
+            };
+            const contentType = contentTypes[ext] || 'application/octet-stream';
+            
+            res.setHeader('Content-Type', contentType);
+            res.setHeader('Content-Length', stat.size);
+            res.setHeader('Cache-Control', 'public, max-age=31536000');
+            
+            const stream = fs.createReadStream(filePath);
+            stream.pipe(res);
+        } else {
+            return next();
+        }
+    } catch (error) {
+        console.error('Error serving file:', error);
+        return next(error);
     }
 });
 
 // Middleware definitions
 app.use('/assets', apiProxy);
+
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true, limit: '25mb' }));
 app.use(bodyParser.json({ limit: '25mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
+app.locals.normalizeMediaUrl = normalizeMediaUrl;
 app.use(cors({
   origin: (origin, callback) => {
     // Native mobile requests often omit Origin entirely.

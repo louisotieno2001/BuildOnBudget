@@ -3,6 +3,7 @@ const router = express.Router();
 const url = process.env.DIRECTUS_URL;
 const accessToken = process.env.DIRECTUS_TOKEN;
 const { initiateSTKPush } = require('../mpesa');
+const { normalizeMediaUrl } = require('../utils/media');
 
 // Query function to directus API endpoints
 async function query(path, config) {
@@ -28,6 +29,7 @@ router.get('/', async (req, res) => {
         return res.redirect('/login');
     }
     try {
+        const assetBaseUrl = `${req.protocol}://${req.get('host')}`;
         const wantsJson = req.query.format === 'json' || req.headers.accept?.includes('application/json');
         const buildOrdersWithProducts = async (status) => {
             const resOrdersByStatus = await query(
@@ -38,12 +40,13 @@ router.get('/', async (req, res) => {
                 return [];
             }
             const productIds = statusPayload.data.map(o => o.product_id);
-            const resProducts = await query(`/items/shop?filter[id][_in]=${productIds.join(',')}&fields=id,name,description,price,media.*`);
+            const resProducts = await query(`/items/shop?filter[id][_in]=${productIds.join(',')}&fields=id,name,description,price,media`);
             const productsPayload = await resProducts.json();
             const productMap = {};
             if (productsPayload.data) {
                 productsPayload.data.forEach(p => {
-                    productMap[p.id] = p;
+                    const mediaUrl = normalizeMediaUrl(p.media, { baseUrl: assetBaseUrl });
+                    productMap[p.id] = { ...p, media_url: mediaUrl };
                 });
             }
             return statusPayload.data.map(o => ({
@@ -62,14 +65,20 @@ router.get('/', async (req, res) => {
         if (orders.data && orders.data.length > 0) {
             // Fetch item details for the products in orders
             const itemIds = orders.data.map(o => o.product_id);
-            const resItems = await query(`/items/shop?filter[id][_in]=${itemIds.join(',')}&fields=*,media.*`);
+            const resItems = await query(`/items/shop?filter[id][_in]=${itemIds.join(',')}&fields=*`);
             const items = await resItems.json();
             cartItems = orders.data.map(o => {
                 const item = items.data.find(i => i.id == o.product_id);
                 if (!item) return null; // Skip if item not found
                 const price = parseFloat(item.price);
                 const qty = parseInt(o.units);
-                return { ...item, quantity: qty, total: price * qty, order_id: o.id };
+                return {
+                    ...item,
+                    media_url: normalizeMediaUrl(item.media, { baseUrl: assetBaseUrl }),
+                    quantity: qty,
+                    total: price * qty,
+                    order_id: o.id
+                };
             }).filter(Boolean);
         }
         if (wantsJson) {
@@ -134,7 +143,7 @@ router.post('/checkout', async (req, res) => {
         }
         // Fetch item details
         const itemIds = orders.data.map(o => o.product_id);
-        const resItems = await query(`/items/shop?filter[id][_in]=${itemIds.join(',')}&fields=*,media.*`);
+        const resItems = await query(`/items/shop?filter[id][_in]=${itemIds.join(',')}&fields=*`);
         const items = await resItems.json();
 
         // Calculate total amount

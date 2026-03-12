@@ -56,6 +56,8 @@ services:
       buildonbudget:
     ports:
       - "0.0.0.0:3000:3000"
+    volumes:
+      - ./docker/directus/uploads:/directus/uploads:ro
 
 networks:
   buildonbudget:

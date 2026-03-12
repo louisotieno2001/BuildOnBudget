@@ -36,7 +36,7 @@
           <a href="/new-project">+ New Project</a>
         </button>
         <button id="profile-toggle" class="relative">
-          <img src="<%= user.profile_image || 'https://picsum.photos/200/300/?blur=2' %>"
+          <img src="<%= normalizeMediaUrl(user.profile_image) || 'https://picsum.photos/200/300/?blur=2' %>"
                class="w-10 h-10 rounded-full border-2 border-border object-cover">
         </button>
         <!-- Profile Dropdown -->
@@ -62,7 +62,7 @@
       <div class="flex flex-col h-full">
        <!-- Sidebar Profile -->
         <div class="px-4 py-3 flex items-center space-x-3">
-          <img src="<%= user.profile_image || 'https://picsum.photos/200/300/?blur=2' %>" 
+          <img src="<%= normalizeMediaUrl(user.profile_image) || 'https://picsum.photos/200/300/?blur=2' %>" 
                class="w-12 h-12 rounded-full border-2 border-border object-cover">
           <div>
             <p class="font-semibold"><%= user.name %></p>
@@ -482,9 +482,9 @@
       <div id="tab-settings" class="tab-content bg-bg-secondary rounded-xl shadow hidden">
         <!-- Cover Photo -->
          <div class="relative mb-16">
-         <img id="cover-photo" src="<%= user.profile_image || 'https://picsum.photos/800/400/?blur=2' %>" alt="Cover Photo" class="w-full object-cover rounded-t-xl" style="max-height: 200px;" />
+         <img id="cover-photo" src="<%= normalizeMediaUrl(user.profile_image) || 'https://picsum.photos/800/400/?blur=2' %>" alt="Cover Photo" class="w-full object-cover rounded-t-xl" style="max-height: 200px;" />
           <!-- Profile Image Overlay -->
-          <img id="profile-image" src="<%= user.profile_image || 'https://picsum.photos/200/200/?blur=2' %>" alt="Profile Image" class="w-24 h-24 rounded-full object-cover border-4 border-bg-secondary absolute bottom-0 left-6 transform translate-y-1/2" />
+          <img id="profile-image" src="<%= normalizeMediaUrl(user.profile_image) || 'https://picsum.photos/200/200/?blur=2' %>" alt="Profile Image" class="w-24 h-24 rounded-full object-cover border-4 border-bg-secondary absolute bottom-0 left-6 transform translate-y-1/2" />
         </div>
 
         <!-- User Details -->
