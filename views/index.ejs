@@ -47,52 +47,6 @@
     <!-- Overlay -->
     <div class="overlay absolute top-0 left-0 right-0 bottom-0 bg-black opacity-50 z-10"></div>
 
-    <!-- Header -->
-    <div x-data="{ mobileOpen: false }">
-      <!-- Desktop Header (md+) -->
-      <header
-        class="hidden md:flex bg-bg-primary text-text-primary px-3 py-1 justify-between items-center sticky top-0 z-50">
-        <!-- Logo -->
-        <div class="flex items-center gap-2">
-          <img class="w-12 h-12 logo" src="/images/logo.png" alt="Logo">
-        </div>
-        <!-- Desktop Nav -->
-        <nav class="block">
-          <ul class="flex space-x-6">
-            <li><a href="/" class="bg-purple-600 text-white px-5 py-2 rounded-lg shadow hover:bg-purple-700 transition">Home</a></li>
-            <li><a href="/login" class="bg-purple-600 text-white px-5 py-2 rounded-lg shadow hover:bg-purple-700 transition">Login</a></li>
-            <li><a href="/signup"
-                class="bg-purple-600 text-white px-5 py-2 rounded-lg shadow hover:bg-purple-700 transition">Get
-                Started</a></li>
-          </ul>
-        </nav>
-      </header>
-      <!-- Mobile Header (below md) -->
-      <header
-        class="md:hidden bg-bg-primary text-text-primary border-b px-6 py-3 flex justify-between items-center sticky top-0 z-50">
-        <div class="flex items-center gap-2">
-          <img class="w-10 h-10 logo" src="/images/logo.png" alt="Logo">
-        </div>
-        <button @click="mobileOpen = !mobileOpen" aria-label="Toggle menu" class="p-2 rounded-md border border-border">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-          </svg>
-        </button>
-      </header>
-      <!-- Mobile Dropdown Menu -->
-      <nav x-show="mobileOpen" x-transition class="md:hidden border-b border-border px-6 py-3 bg-bg-primary z-40">
-        <ul class="space-y-3">
-          <li><a @click="mobileOpen = false" href="/"
-              class="inline-block bg-purple-600 text-white px-5 py-2 rounded-lg shadow hover:bg-purple-700 transition">Home</a></li>
-          <li><a @click="mobileOpen = false" href="/login"
-              class="inline-block bg-purple-600 text-white px-5 py-2 rounded-lg shadow hover:bg-purple-700 transition">Login</a></li>
-          <li><a @click="mobileOpen = false" href="/signup"
-              class="inline-block bg-purple-600 text-white px-5 py-2 rounded-lg shadow hover:bg-purple-700 transition">Get
-              Started</a></li>
-        </ul>
-      </nav>
-    </div>
-
     <!-- Hero Section -->
     <section class="flex flex-col lg:flex-row items-center justify-between px-10 lg:px-24 py-16 gap-10 relative z-20">
 
