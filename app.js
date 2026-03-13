@@ -27,9 +27,26 @@ const DEFAULT_ALLOWED_ORIGINS = [
   'http://localhost:8055',
   'https://www.buildonbudget.hustlerati.com',
 ];
-const allowedOrigins = process.env.CORS_ALLOWED_ORIGINS
+const envAllowedOrigins = process.env.CORS_ALLOWED_ORIGINS
   ? process.env.CORS_ALLOWED_ORIGINS.split(',').map((origin) => origin.trim()).filter(Boolean)
-  : DEFAULT_ALLOWED_ORIGINS;
+  : [];
+
+const normalizeOrigin = (value) => {
+  if (!value) return '';
+  try {
+    return new URL(value).origin;
+  } catch (error) {
+    return value.replace(/\/+$/, '');
+  }
+};
+
+const allowedOrigins = Array.from(
+  new Set(
+    [...DEFAULT_ALLOWED_ORIGINS, ...envAllowedOrigins]
+      .map((origin) => normalizeOrigin(origin))
+      .filter(Boolean)
+  )
+);
 
 // Proxy configuration
 const apiProxy = createProxyMiddleware({
@@ -119,7 +136,8 @@ app.use(cors({
   origin: (origin, callback) => {
     // Native mobile requests often omit Origin entirely.
     if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
+    const normalizedOrigin = normalizeOrigin(origin);
+    if (allowedOrigins.includes(normalizedOrigin)) return callback(null, true);
     return callback(new Error(`CORS blocked for origin: ${origin}`));
   },
   credentials: true,
