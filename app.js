@@ -25,6 +25,7 @@ const DEFAULT_ALLOWED_ORIGINS = [
   'exp://localhost:19000',
   'http://localhost:3000',
   'http://localhost:8055',
+  'https://www.buildonbudget.hustlerati.com',
 ];
 const allowedOrigins = process.env.CORS_ALLOWED_ORIGINS
   ? process.env.CORS_ALLOWED_ORIGINS.split(',').map((origin) => origin.trim()).filter(Boolean)
