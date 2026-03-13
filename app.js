@@ -8,6 +8,7 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const multer = require('multer');
 const { normalizeMediaUrl } = require('./utils/media');
 
 // Declarations
@@ -372,7 +373,18 @@ async function createTask(taskData) {
     return await res.json();
 }
 
-app.post('/new-project', checkSession, async (req, res) => {
+const upload = multer({
+    storage: multer.diskStorage({
+        destination: '/tmp',
+        filename: (req, file, cb) => {
+            const safeName = file.originalname ? file.originalname.replace(/\\s+/g, '_') : 'attachment.pdf';
+            cb(null, `${Date.now()}-${safeName}`);
+        }
+    }),
+    limits: { fileSize: 500 * 1024 * 1024 },
+});
+
+app.post('/new-project', checkSession, upload.single('attachment'), async (req, res) => {
     try {
         const {
             name,
@@ -399,7 +411,18 @@ app.post('/new-project', checkSession, async (req, res) => {
             return res.status(400).json({ error: 'Please fill in all required fields' });
         }
 
-        const normalizedBase64 = normalizeBase64Payload(attachment_base64);
+        let normalizedBase64 = normalizeBase64Payload(attachment_base64);
+        let finalAttachmentName = attachment_name || null;
+        let finalAttachmentType = attachment_type || null;
+
+        if (req.file) {
+            const fs = require('fs');
+            const fileBuffer = fs.readFileSync(req.file.path);
+            normalizedBase64 = fileBuffer.toString('base64');
+            finalAttachmentName = req.file.originalname || req.file.filename;
+            finalAttachmentType = req.file.mimetype || 'application/octet-stream';
+            fs.unlink(req.file.path, () => {});
+        }
 
         const projectData = {
             name,
@@ -415,8 +438,8 @@ app.post('/new-project', checkSession, async (req, res) => {
             contractors,
             permits,
             safety,
-            attachment_name: attachment_name || null,
-            attachment_type: attachment_type || null,
+            attachment_name: finalAttachmentName,
+            attachment_type: finalAttachmentType,
             attachment_base64: normalizedBase64 || null,
             status: false,
             user_id: user_id
