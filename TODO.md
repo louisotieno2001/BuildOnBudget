@@ -1,17 +1,9 @@
-# M-Pesa Daraja API STK Push Implementation for Checkout
+# Backend 3D Fix for project_3d.ejs
 
-## Completed Tasks
-- [x] Add M-Pesa credentials placeholders to .env
-- [x] Install axios for HTTP requests (optional, since fetch is used, but axios might be easier)
-- [x] Create a new module (mpesa.js) for M-Pesa API functions: get access token, initiate STK Push, handle callback
-- [x] Modify /cart/checkout route: Instead of immediately completing, initiate STK Push and return a waiting message
-- [x] Add a new route for M-Pesa callback to confirm payment and update order status
-- [x] Update frontend to handle the new checkout flow (e.g., show waiting for payment, poll for status or redirect after callback)
-- [x] Ensure order status is updated only on successful payment
-- [x] Create a fallback URL page that tells the user payment is successful
+Steps:
+- [ ] 1. Create TODO.md (done)
+- [x] 2. Add GET /projects/:id/3d route to routes/dashboard.js to render project_3d.ejs
+- [x] 3. Add API routes to app.js: GET /projects/:id/3d-model, POST /projects/:id/docs (mock)
+- [ ] 4. Update TODO.md
+- [ ] 5. Test: cd BuildOnBudget-Backend && node app.js, visit /projects/[id]/3d
 
-## Remaining Tasks
-- [ ] Implement order completion logic in the callback handler
-- [ ] Add proper session/database storage for pending payments
-- [ ] Update frontend JavaScript to handle the new checkout response
-- [ ] Test the integration with actual M-Pesa credentials

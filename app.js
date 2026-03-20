@@ -776,6 +776,21 @@ app.delete('/budget/:id', checkSession, async (req, res) => {
     }
 });
 
+// 3D Model API endpoints (mock for demo)
+app.get('/projects/:id/3d-model', checkSession, async (req, res) => {
+  // Mock response matching frontend/EJS expectations
+  res.json({
+    modelUrl: 'https://threejs.org/examples/models/gltf/DamagedHelmet/glTF/DamagedHelmet.gltf',
+    status: 'ready',
+    progress: 100
+  });
+});
+
+app.post('/projects/:id/docs', checkSession, upload.array('docs', 10), async (req, res) => {
+  console.log(`Mock upload ${req.files?.length || 0} docs for project ${req.params.id}`);
+  res.json({ jobId: `mock-${Date.now()}` });
+});
+
 // Start the server
 app.listen(PORT, () => {
     console.log(`Server listening on http://localhost:${PORT}`);

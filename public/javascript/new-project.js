@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const attachments = document.getElementById('attachments').files;
 
         if (!projectName || !projectType || !projectLocation || !projectBudget || !projectStartDate) {
-            alert('Please fill in all required fields');
+            showToast('Please fill in all required fields', 'error');
             return;
         }
 
@@ -57,6 +57,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             payload.attachment_base64 = typeof dataUrl === 'string' ? dataUrl.split(',')[1] : null;
         }
 
+        // Loading state during submit
+        const submitButton = document.getElementById('create-project-button');
+        const originalText = window.utils.showLoading(submitButton);
+
         try {
             const response = await authFetch('/new-project', {
                 method: 'POST',
@@ -64,17 +68,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                 body: JSON.stringify(payload)
             });
 
+            window.utils.hideLoading(submitButton, originalText);
+
             if (response.ok) {
                 const result = await response.json();
-                alert('Project created successfully!');
+                showToast('Project created successfully!', 'success');
                 window.location.href = `/dashboard`; // Redirect to dashboard or project page
             } else {
                 const error = await response.json();
-                alert(`Error: ${error.message}`);
+                showToast(`Error: ${error.message}`, 'error');
+                window.utils.hideLoading(submitButton, originalText);
             }
         } catch (error) {
             console.error('Error creating project:', error);
-            alert('An error occurred while creating the project. Please try again.');
+            showToast('An error occurred while creating the project. Please try again.', 'error');
+            window.utils.hideLoading(submitButton, originalText);
         }
     });
+
+    // No loading state outside submit
 })

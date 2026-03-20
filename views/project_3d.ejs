@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>3D Viewer - <%= project.name %> - BuildOnBudget</title>
+  <link href="/output.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r161/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.161.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.161.0/examples/js/controls/OrbitControls.js"></script>
+  <link rel="shortcut icon" href="/images/logo.png" type="image/x-icon">
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+
+<body x-data="{ sidebarOpen: false, profileOpen: false }"
+  class="bg-bg-primary text-text-primary min-h-screen flex flex-col">
+
+  <div class="flex flex-1">
+    <main class="flex-1 ml-0 md:ml-0 p-4 md:p-8 transition-all">
+      <div class="bg-bg-primary p-4 md:p-6 rounded-xl">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 md:mb-6 gap-4">
+          <a href="/projects/<%= project.id %>" class="bg-purple-600 text-white px-3 md:px-4 py-2 rounded-lg hover:bg-purple-700 transition text-sm md:text-base flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            Back to Project Details
+          </a>
+          <h2 class="text-2xl md:text-3xl font-extrabold text-purple-700">3D Visualization - <%= project.name %></h2>
+        </div>
+
+        <div id="viewer-container" style="height: 60vh; width: 100%; position: relative; background: #f0f0f0; border-radius: 0.75rem; overflow: hidden;"></div>
+
+        <div class="mt-6 space-y-4">
+          <div class="bg-bg-secondary p-4 rounded-lg shadow-sm">
+            <h3 class="text-lg font-semibold mb-2">Status: <span id="status">Loading...</span> <span id="progress" class="ml-2"></span></h3>
+            <div class="w-full bg-gray-200 rounded-full h-2.5">
+              <div id="progress-bar" class="bg-purple-600 h-2.5 rounded-full transition-all" style="width: 0%"></div>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <form id="upload-form" enctype="multipart/form-data" class="bg-bg-secondary p-4 rounded-lg shadow-sm">
+              <h3 class="text-lg font-semibold mb-2">Upload BOQ / Plans</h3>
+              <input type="file" id="docs-upload" multiple accept=".pdf,image/*,.dwg" class="w-full p-2 border border-gray-300 rounded-lg mb-2">
+              <button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 w-full">Upload Docs</button>
+            </form>
+            <div class="bg-bg-secondary p-4 rounded-lg shadow-sm">
+              <button id="refresh-btn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 w-full mb-2">Refresh Model</button>
+              <button id="reset-btn" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 w-full">Reset View</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="bg-bg-secondary text-text-secondary text-center py-4 mt-auto border-t border-border">
+    &copy; <%= new Date().getFullYear() %> BuildOnBudget. All rights reserved.
+  </footer>
+
+  <script>
+    const projectId = '<%= project.id %>';
+    let scene, camera, renderer, controls, loader;
+    let modelUrl = null;
+    let status = 'idle';
+
+    function init3D() {
+      const container = document.getElementById('viewer-container');
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0xf0f8ff);
+
+      camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+      camera.position.set(5, 5, 5);
+
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.shadowMap.enabled = true;
+      container.appendChild(renderer.domElement);
+
+      // Lights
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+      scene.add(ambientLight);
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      directionalLight.position.set(10, 10, 5);
+      scene.add(directionalLight);
+
+      // Dummy house
+      const houseGroup = new THREE.Group();
+      const bodyGeometry = new THREE.BoxGeometry(4, 2, 4);
+      const bodyMaterial = new THREE.MeshLambertMaterial({ color: 0xffa500 });
+      const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+      houseGroup.add(body);
+
+      const roofGeometry = new THREE.ConeGeometry(3, 2, 4);
+      const roofMaterial = new THREE.MeshLambertMaterial({ color: 0xff0000 });
+      const roof = new THREE.Mesh(roofGeometry, roofMaterial);
+      roof.position.y = 2;
+      houseGroup.add(roof);
+
+      scene.add(houseGroup);
+
+      loader = new THREE.GLTFLoader();
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+
+      animate();
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    function loadModel(url) {
+      loader.load(url, (gltf) => {
+        scene.clear();
+        // Add lights again
+        scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+        scene.add(new THREE.DirectionalLight(0xffffff, 0.8, new THREE.Vector3(10, 10, 5)));
+        scene.add(gltf.scene);
+        gltf.scene.scale.set(0.5, 0.5, 0.5);
+        camera.position.set(5, 5, 5);
+      }, undefined, (err) => console.error('Load error', err));
+    }
+
+    async function pollModel() {
+      try {
+        const res = await fetch(`/projects/${projectId}/3d-model`);
+        const data = await res.json();
+        document.getElementById('status').textContent = data.status;
+        const prog = data.progress || 0;
+        document.getElementById('progress').textContent = prog ? `(${prog}%)` : '';
+        document.getElementById('progress-bar').style.width = prog + '%';
+        if (data.modelUrl && data.modelUrl !== modelUrl) {
+          modelUrl = data.modelUrl;
+          loadModel(modelUrl);
+        }
+      } catch (err) {
+        document.getElementById('status').textContent = 'error';
+      }
+    }
+
+    document.getElementById('upload-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData();
+      const files = document.getElementById('docs-upload').files;
+      for (let file of files) formData.append('docs', file);
+      document.getElementById('status').textContent = 'uploading';
+      await fetch(`/projects/${projectId}/docs`, { method: 'POST', body: formData });
+      document.getElementById('status').textContent = 'generating';
+    });
+
+    document.getElementById('refresh-btn').onclick = pollModel;
+    window.pollModel = pollModel;
+
+    window.addEventListener('load', () => {
+      init3D();
+      pollModel();
+      setInterval(pollModel, 5000);
+    });
+
+    window.addEventListener('resize', () => {
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+    });
+  </script>
+
+</body>
+
+</html>

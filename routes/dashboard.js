@@ -370,13 +370,24 @@ router.get('/:id', async (req, res) => {
     }
 
     const project = await fetchProjectById(projectId);
-    // console.log('Fetched project:', project);
-
     if (!project) {
         return res.status(404).send('Project not found');
     }
 
     res.render('project_details', { user: req.user, project: project });
+});
+
+// 3D Viewer route for project_3d.ejs
+router.get('/projects/:id/3d', async (req, res) => {
+  if (!req.user) {
+    return res.redirect('/login');
+  }
+  const projectId = req.params.id;
+  const project = await fetchProjectById(projectId);
+  if (!project) {
+    return res.status(404).send('Project not found');
+  }
+  res.render('project_3d', { project, user: req.user });
 });
 
 // Orders route
