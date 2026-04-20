@@ -127,8 +127,8 @@ app.get('/assets/:filename', async (req, res, next) => {
 app.use('/assets', apiProxy);
 
 app.use(cookieParser());
-app.use(bodyParser.urlencoded({ extended: true, limit: '25mb' }));
-app.use(bodyParser.json({ limit: '25mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
+app.use(bodyParser.json({ limit: '50mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 app.locals.normalizeMediaUrl = normalizeMediaUrl;
@@ -251,8 +251,6 @@ app.post('/signup', async (req, res) => {
     try {
         const { name, email, phone, password } = req.body;
 
-        // console.log('Userdata', req.body)
-
         if(!name || !email || !phone || !password){
             return res.status(400).json({error: 'Please fill all the fields'});
         }
@@ -263,8 +261,6 @@ app.post('/signup', async (req, res) => {
         };
 
         const newUser = await signupUser(userData);
-
-        // console.log("Directus", newUser)
 
         if (newUser && newUser.data && newUser.data.password) {
             delete newUser.data.password;
@@ -396,80 +392,113 @@ const upload = multer({
     storage: multer.diskStorage({
         destination: '/tmp',
         filename: (req, file, cb) => {
-            const safeName = file.originalname ? file.originalname.replace(/\\s+/g, '_') : 'attachment.pdf';
+            const safeName = file.originalname ? file.originalname.replace(/[\\s/]+/g, '_') : 'attachment.pdf';
             cb(null, `${Date.now()}-${safeName}`);
         }
     }),
-    limits: { fileSize: 500 * 1024 * 1024 },
+    limits: { 
+        fileSize: 5 * 1024 * 1024 * 1024, // 5GB
+        fieldSize: 50 * 1024 * 1024 // 50MB for form fields
+    },
 });
 
 app.post('/new-project', checkSession, upload.single('attachment'), async (req, res) => {
-    try {
-        const {
-            name,
-            type,
-            client_name,
-            client_contact,
-            location,
-            description,
-            budget,
-            start_date,
-            end_date,
-            materials,
-            contractors,
-            permits,
-            safety,
-            attachment_name,
-            attachment_type,
-            attachment_base64
-        } = req.body;
+  try {
+    console.log('=== NEW-PROJECT DEBUG START ===');
+    console.log('User ID:', req.user?.id);
+    console.log('Content-Type:', req.headers['content-type']);
+    console.log('Body keys:', Object.keys(req.body));
+    console.log('Has file:', !!req.file);
+    if (req.file) {
+        console.log('File details:', {
+            originalname: req.file.originalname,
+            mimetype: req.file.mimetype,
+            size: req.file.size,
+            path: req.file.path
+        });
+    }
+    if (req.fileValidationError) {
+        console.error('Multer validation error:', req.fileValidationError);
+        console.log('=== NEW-PROJECT DEBUG END (MULTER ERROR) ===');
+        return res.status(400).json({ error: 'File too large or invalid: ' + req.fileValidationError.message });
+    }
+    const {
+        name,
+        type,
+        client_name,
+        client_contact,
+        location,
+        description,
+        budget,
+        start_date,
+        end_date,
+        materials,
+        contractors,
+        permits,
+        safety,
+        attachment_name,
+        attachment_type,
+        attachment_base64
+    } = req.body;
 
-        const user_id = req.user.id;
+    console.log('Form data summary:', { name, type, location, budget, start_date, has_attachment_base64: !!attachment_base64 });
 
-        if (!name || !type || !location || !budget || !start_date) {
-            return res.status(400).json({ error: 'Please fill in all required fields' });
-        }
+    const user_id = req.user.id;
 
-        let normalizedBase64 = normalizeBase64Payload(attachment_base64);
-        let finalAttachmentName = attachment_name || null;
-        let finalAttachmentType = attachment_type || null;
+    if (!name || !type || !location || !budget || !start_date) {
+        console.log('Validation failed - missing required fields');
+        return res.status(400).json({ error: 'Please fill in all required fields' });
+    }
 
-        if (req.file) {
-            const fs = require('fs');
-            const fileBuffer = fs.readFileSync(req.file.path);
-            normalizedBase64 = fileBuffer.toString('base64');
-            finalAttachmentName = req.file.originalname || req.file.filename;
-            finalAttachmentType = req.file.mimetype || 'application/octet-stream';
-            fs.unlink(req.file.path, () => {});
-        }
+    let normalizedBase64 = normalizeBase64Payload(attachment_base64);
+    let finalAttachmentName = attachment_name || null;
+    let finalAttachmentType = attachment_type || null;
 
-        const projectData = {
-            name,
-            type,
-            client_name,
-            client_contact,
-            location,
-            description,
-            budget: parseFloat(budget),
-            start_date,
-            deadline: end_date,
-            materials,
-            contractors,
-            permits,
-            safety,
-            attachment_name: finalAttachmentName,
-            attachment_type: finalAttachmentType,
-            attachment_base64: normalizedBase64 || null,
-            status: false,
-            user_id: user_id
-        };
+    console.log('Base64 payload length:', normalizedBase64 ? normalizedBase64.length : 0);
+    console.log('Final attachment:', { finalAttachmentName, finalAttachmentType });
 
-        const newProject = await createProject(projectData);
+    if (req.file) {
+        const fs = require('fs');
+        const fileBuffer = fs.readFileSync(req.file.path);
+        normalizedBase64 = fileBuffer.toString('base64');
+        finalAttachmentName = req.file.originalname || req.file.filename;
+        finalAttachmentType = req.file.mimetype || 'application/octet-stream';
+        fs.unlink(req.file.path, () => {});
+        console.log('Processed uploaded file to base64, length:', normalizedBase64.length);
+    }
 
-        res.status(201).json({ message: 'Project created successfully', project: newProject });
-    } catch (error) {
+    const projectData = {
+        name,
+        type,
+        client_name,
+        client_contact,
+        location,
+        description,
+        budget: parseFloat(budget),
+        start_date,
+        deadline: end_date,
+        materials,
+        contractors,
+        permits,
+        safety,
+        attachment_name: finalAttachmentName,
+        attachment_type: finalAttachmentType,
+        attachment_base64: normalizedBase64 || null,
+        status: false,
+        user_id: user_id
+    };
+
+    console.log('Sending to Directus:', Object.keys(projectData).filter(k => projectData[k] !== null && projectData[k] !== undefined && projectData[k] !== ''));
+
+    const newProject = await createProject(projectData);
+    console.log('Directus response status:', newProject ? 'success' : 'failed', newProject?.data ? newProject.data.id : 'no data');
+
+    console.log('=== NEW-PROJECT DEBUG END ===');
+    res.status(201).json({ message: 'Project created successfully', project: newProject });
+  } catch (error) {
         console.error('Error creating project', error);
-        res.status(500).json({ error: 'Internal server error' });
+        console.log('=== NEW-PROJECT DEBUG END (ERROR) ===');
+        res.status(500).json({ error: 'Internal server error', details: error.message });
     }
 });
 
