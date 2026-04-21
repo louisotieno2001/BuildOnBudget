@@ -104,9 +104,14 @@
     </main>
   </div>
 
-  <!-- FOOTER -->
-  <footer class="bg-bg-secondary text-text-secondary text-center py-4 mt-auto border-t border-border">
-    &copy; <%= new Date().getFullYear() %> BuildOnBudget. All rights reserved.
+  <footer class="bg-bg-secondary text-text-secondary py-4 mt-auto border-t border-border">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+      <p class="text-sm">&copy; <%= new Date().getFullYear() %> BuildOnBudget. All rights reserved.</p>
+      <div class="flex gap-6">
+        <a href="/terms" class="text-sm hover:text-accent transition">Terms of Service</a>
+        <a href="/privacy" class="text-sm hover:text-accent transition">Privacy Policy</a>
+      </div>
+    </div>
   </footer>
 </body>
 

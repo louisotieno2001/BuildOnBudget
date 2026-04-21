@@ -238,6 +238,10 @@ const inviteMemberRoute = require('./routes/invite-member');
 app.use('/invite-member', inviteMemberRoute);
 const budgetRoute = require('./routes/budget');
 app.use('/budget', budgetRoute);
+const termsRoute = require('./routes/terms');
+app.use('/terms', termsRoute);
+const privacyRoute = require('./routes/privacy');
+app.use('/privacy', privacyRoute);
 
 async function signupUser(userData) {
     let res = await query(`/items/users`, {
