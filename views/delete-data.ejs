@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Delete Your Data - BuildOnBudget</title>
+  <link href="/output.css" rel="stylesheet" />
+  <link href="/toast.css" rel="stylesheet" />
+  <link rel="shortcut icon" href="/images/logo.png" type="image/x-icon">
+</head>
+
+<body class="w-full bg-bg-primary text-text-primary min-h-screen flex flex-col">
+  <div class="flex-grow py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-3xl mx-auto">
+      <h1 class="text-4xl font-extrabold text-accent mb-2">Delete Your Data</h1>
+      <p class="text-sm text-gray-500 mb-8">How to remove your account and associated data</p>
+
+      <div class="space-y-8 text-text-secondary">
+        <section>
+          <h2 class="text-xl font-bold text-accent mb-3">How to Delete Your Data</h2>
+          <p class="leading-relaxed mb-4">
+            Deleting your account is the only step needed to remove all your data from our servers. When you delete your account, we immediately remove:
+          </p>
+          <ul class="list-disc list-inside space-y-2 ml-2">
+            <li>Your profile information</li>
+            <li>All your projects and project data</li>
+            <li>Budget information</li>
+            <li>Task lists</li>
+            <li>Any other data associated with your account</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="text-xl font-bold text-accent mb-3">No Separate Request Needed</h2>
+          <p class="leading-relaxed">
+            Because we delete all associated data immediately when you delete your account, you do not need to send a separate data deletion request. Once your account is deleted, all your data is permanently removed from our servers.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="text-xl font-bold text-accent mb-3">How to Delete Your Account</h2>
+          <p class="leading-relaxed mb-4">
+            To delete your account:
+          </p>
+          <ol class="list-decimal list-inside space-y-2 ml-2">
+            <li>Log in to your BuildOnBudget account</li>
+            <li>Go to <strong>Settings</strong> in the app</li>
+            <li>Click the <strong>Delete Account</strong> button</li>
+            <li>Confirm the deletion when prompted</li>
+          </ol>
+        </section>
+
+        <section>
+          <h2 class="text-xl font-bold text-accent mb-3">What Happens After Deletion</h2>
+          <p class="leading-relaxed">
+            Once you confirm account deletion, your account and all associated data are permanently and immediately removed from our servers. This action cannot be undone.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="text-xl font-bold text-accent mb-3">Contact Us</h2>
+          <p class="leading-relaxed">
+            If you have any questions about deleting your data, contact us at support@buildonbudget.com.
+          </p>
+        </section>
+
+        <div class="pt-4">
+          <a href="/privacy" class="inline-flex items-center text-accent hover:underline">
+            &larr; Back to Privacy Policy
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="bg-bg-secondary text-text-secondary py-4 mt-auto border-t border-border">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+      <p class="text-sm">&copy; <%= new Date().getFullYear() %> BuildOnBudget. All rights reserved.</p>
+      <div class="flex gap-6">
+        <a href="/terms" class="text-sm hover:text-accent transition">Terms of Service</a>
+        <a href="/privacy" class="text-sm hover:text-accent transition">Privacy Policy</a>
+      </div>
+    </div>
+  </footer>
+</body>
+
+</html>

@@ -242,6 +242,8 @@ const termsRoute = require('./routes/terms');
 app.use('/terms', termsRoute);
 const privacyRoute = require('./routes/privacy');
 app.use('/privacy', privacyRoute);
+const deleteDataRoute = require('./routes/delete-data');
+app.use('/delete-data', deleteDataRoute);
 
 async function signupUser(userData) {
     let res = await query(`/items/users`, {
