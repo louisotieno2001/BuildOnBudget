@@ -805,6 +805,25 @@ app.delete('/budget/:id', checkSession, async (req, res) => {
     }
 });
 
+// Delete user account
+app.delete('/delete-account', checkSession, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const resDelete = await query(`/items/users/${userId}`, {
+            method: 'DELETE'
+        });
+        if (resDelete.ok) {
+            res.clearCookie(AUTH_COOKIE_NAME);
+            res.status(200).json({ message: 'Account deleted successfully' });
+        } else {
+            res.status(500).json({ error: 'Failed to delete account' });
+        }
+    } catch (error) {
+        console.error('Error deleting account:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 // 3D Model API endpoints (mock for demo)
 app.get('/projects/:id/3d-model', checkSession, async (req, res) => {
   // Mock response matching frontend/EJS expectations
