@@ -6,99 +6,126 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Signup - BuildOnBudget</title>
   <link href="/output.css" rel="stylesheet" />
+  <link href="/styles.css" rel="stylesheet" />
   <link href="/toast.css" rel="stylesheet" />
-  <link rel="shortcut icon" href="/images/logo.png" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Oswald:wght@200..700&family=Plus+Jakarta+Sans:wght@200..800&display=swap" rel="stylesheet">
+  <link rel="shortcut icon" href="/images/logo.png" type="image">
   <script defer src="/javascript/index.js"></script>
+  <style>
+    :root {
+      --font-heading: 'Oswald', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+      --font-accent: 'DM Sans', sans-serif;
+    }
+    body {
+      font-family: var(--font-body);
+    }
+    h1, h2, h3, h4, h5, h6 {
+      font-family: var(--font-heading);
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+    .font-accent {
+      font-family: var(--font-accent);
+    }
+    .hero-gradient {
+      background: linear-gradient(135deg, #1e1b4b 0%, #4c1d95 50%, #312e81 100%);
+    }
+    .hero-pattern {
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .glow-effect {
+      box-shadow: 0 0 60px rgba(139, 92, 246, 0.3);
+    }
+    .btn-glow:hover {
+      box-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
+    }
+  </style>
 </head>
 
-<body class="w-full bg-bg-primary text-text-primary min-h-screen flex flex-col">
-  <div id="toast-container"></div>
-  <div class="w-full bg-bg-primary text-text-primary min-h-screen flex flex-col items-center justify-center">
-    <!-- Main (Centered Form) -->
-    <main class="flex-grow flex items-center justify-center px-4 py-12 min-h-screen">
-      <div class="w-full max-w-md bg-bg-primary dark:bg-bg-primary p-8 rounded-lg animate-fadeInUp">
-        <h2 class="text-3xl font-extrabold mb-6 text-center text-gradient">Create your account</h2>
-        <form id="login-form" class="space-y-6">
+<body class="bg-bg-primary text-text-primary min-h-screen flex flex-col font-body">
+  <div class="toast-container" id="toast-container"></div>
+  <section class="relative min-h-screen hero-gradient hero-pattern flex items-center">
+    <div class="absolute inset-0 overflow-hidden">
+      <div class="absolute top-20 left-10 w-72 h-72 bg-purple-500/20 rounded-full blur-3xl"></div>
+      <div class="absolute bottom-20 right-10 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl"></div>
+    </div>
 
-          <!-- Name -->
-          <div>
-            <label for="name" class="block mb-1 font-medium">Name</label>
-            <input type="text" id="name" name="name" required
-              class="w-full border border-border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
-              placeholder="Firstname Secondname" />
-            <div id="name-error" class="text-red-500 text-sm mt-1 hidden">
-              <span></span>
+    <div class="relative z-20 max-w-7xl mx-auto px-6 lg:px-12 py-32 w-full flex items-center justify-center min-h-screen">
+      <div class="w-full max-w-md">
+        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/10 glow-effect">
+          <div class="text-center mb-8">
+            <div class="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-user-plus text-white text-2xl"></i>
             </div>
+            <h2 class="text-3xl font-bold text-white">Create Account</h2>
+            <p class="text-slate-300 mt-2">Join BuildOnBudget today</p>
           </div>
 
-          <!-- Email -->
-          <div>
-            <label for="email" class="block mb-1 font-medium">Email</label>
-            <input type="email" id="email" name="email" required
-              class="w-full border border-border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
-              placeholder="you@example.com" />
-            <div id="email-error" class="text-red-500 text-sm mt-1 hidden">
-              <span></span>
+          <form id="signup-form" class="space-y-5">
+            <div>
+              <label for="name" class="block mb-2 font-medium text-slate-300">Name</label>
+              <input type="text" id="name" name="name" required
+                class="w-full bg-white/10 border border-white/20 px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-white placeholder-slate-400"
+                placeholder="Firstname Secondname" />
+              <div id="name-error" class="text-red-400 text-sm mt-1 hidden">
+                <span></span>
+              </div>
             </div>
-          </div>
 
-          <!-- Phone -->
-          <div>
-            <label for="phone" class="block mb-1 font-medium">Phone</label>
-            <input type="tel" id="phone" name="phone" required
-              class="w-full border border-border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
-              placeholder="+254 7xxxxxxxx" />
-            <div id="phone-error" class="text-red-500 text-sm mt-1 hidden">
-              <span></span>
+            <div>
+              <label for="email" class="block mb-2 font-medium text-slate-300">Email</label>
+              <input type="email" id="email" name="email" required
+                class="w-full bg-white/10 border border-white/20 px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-white placeholder-slate-400"
+                placeholder="you@example.com" />
+              <div id="email-error" class="text-red-400 text-sm mt-1 hidden">
+                <span></span>
+              </div>
             </div>
-          </div>
 
-          <!-- Password -->
-          <div>
-            <label for="password" class="block mb-1 font-medium">Password</label>
-            <div class="relative flex rounded-lg border border-border sm:border-gray-300">
-              <input type="password" id="password" name="password" required
-                class="flex-1 px-4 py-2 rounded-l-lg bg-transparent text-text-primary focus:outline-none"
-                placeholder="********" />
-              <button type="button" id="password-toggle"
-                class="px-3 py-2 rounded-r-lg bg-transparent flex items-center justify-center text-gray-400 hover:text-gray-200 focus:outline-none">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
-                  </path>
-                </svg>
-              </button>
+            <div>
+              <label for="phone" class="block mb-2 font-medium text-slate-300">Phone</label>
+              <input type="tel" id="phone" name="phone" required
+                class="w-full bg-white/10 border border-white/20 px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-white placeholder-slate-400"
+                placeholder="+254 7xxxxxxxx" />
+              <div id="phone-error" class="text-red-400 text-sm mt-1 hidden">
+                <span></span>
+              </div>
             </div>
-            <div id="password-error" class="text-red-500 text-sm mt-1 hidden">
-              <span></span>
-            </div>
-          </div>
-          <!-- Submit Button -->
-          <button type="submit" id="submit"
-            class="w-full bg-purple-600 text-white py-2 rounded-md font-semibold hover:bg-accent/90 transition cursor-pointer">
-            Signup
-          </button>
-        </form>
 
-        <!-- Extra links -->
-        <p class="mt-6 text-center text-sm text-gray-500">
-          Already have an account?
-          <a href="/login" class="text-accent font-medium hover:underline">Login</a>
-        </p>
-      </div>
-    </main>
-  </div>
-  <footer class="bg-bg-secondary text-text-secondary py-4 mt-auto border-t border-border">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-      <p class="text-sm">&copy; <%= new Date().getFullYear() %> BuildOnBudget. All rights reserved.</p>
-      <div class="flex gap-6">
-        <a href="/terms" class="text-sm hover:text-accent transition">Terms of Service</a>
-        <a href="/privacy" class="text-sm hover:text-accent transition">Privacy Policy</a>
+            <div>
+              <label for="password" class="block mb-2 font-medium text-slate-300">Password</label>
+              <div class="relative">
+                <input type="password" id="password" name="password" required
+                  class="w-full bg-white/10 border border-white/20 px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-white placeholder-slate-400"
+                  placeholder="********" />
+                <button type="button" id="password-toggle"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition">
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+              <div id="password-error" class="text-red-400 text-sm mt-1 hidden">
+                <span></span>
+              </div>
+            </div>
+
+            <button type="submit" id="submit"
+              class="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition btn-glow cursor-pointer">
+              Sign Up
+            </button>
+          </form>
+
+          <p class="mt-6 text-center text-slate-400">
+            Already have an account?
+            <a href="/login" class="text-purple-400 font-medium hover:text-purple-300 transition">Login</a>
+          </p>
+        </div>
       </div>
     </div>
-  </footer>
+  </section>
   <script src="/javascript/toast.js"></script>
   <script src="/javascript/signup.js"></script>
 </body>

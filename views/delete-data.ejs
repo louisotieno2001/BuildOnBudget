@@ -6,83 +6,159 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Delete Your Data - BuildOnBudget</title>
   <link href="/output.css" rel="stylesheet" />
-  <link href="/toast.css" rel="stylesheet" />
-  <link rel="shortcut icon" href="/images/logo.png" type="image/x-icon">
+  <link href="/styles.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Oswald:wght@200..700&family=Plus+Jakarta+Sans:wght@200..800&display=swap" rel="stylesheet">
+  <link rel="shortcut icon" href="/images/logo.png" type="image">
+  <script defer src="/javascript/index.js"></script>
+  <style>
+    :root {
+      --font-heading: 'Oswald', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+      --font-accent: 'DM Sans', sans-serif;
+    }
+    body {
+      font-family: var(--font-body);
+    }
+    h1, h2, h3, h4, h5, h6 {
+      font-family: var(--font-heading);
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+    .font-accent {
+      font-family: var(--font-accent);
+    }
+    .hero-gradient {
+      background: linear-gradient(135deg, #1e1b4b 0%, #4c1d95 50%, #312e81 100%);
+    }
+    .hero-pattern {
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .glow-effect {
+      box-shadow: 0 0 60px rgba(139, 92, 246, 0.3);
+    }
+    .btn-glow:hover {
+      box-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
+    }
+  </style>
 </head>
 
-<body class="w-full bg-bg-primary text-text-primary min-h-screen flex flex-col">
-  <div class="flex-grow py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-3xl mx-auto">
-      <h1 class="text-4xl font-extrabold text-accent mb-2">Delete Your Data</h1>
-      <p class="text-sm text-gray-500 mb-8">How to remove your account and associated data</p>
+<body class="bg-bg-primary text-text-primary min-h-screen flex flex-col font-body">
+  <section class="relative min-h-[40vh] hero-gradient hero-pattern flex items-center">
+    <div class="absolute inset-0 overflow-hidden">
+      <div class="absolute top-20 left-10 w-72 h-72 bg-purple-500/20 rounded-full blur-3xl"></div>
+      <div class="absolute bottom-20 right-10 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl"></div>
+    </div>
 
-      <div class="space-y-8 text-text-secondary">
-        <section>
-          <h2 class="text-xl font-bold text-accent mb-3">How to Delete Your Data</h2>
-          <p class="leading-relaxed mb-4">
-            Deleting your account is the only step needed to remove all your data from our servers. When you delete your account, we immediately remove:
-          </p>
-          <ul class="list-disc list-inside space-y-2 ml-2">
-            <li>Your profile information</li>
-            <li>All your projects and project data</li>
-            <li>Budget information</li>
-            <li>Task lists</li>
-            <li>Any other data associated with your account</li>
-          </ul>
-        </section>
-
-        <section>
-          <h2 class="text-xl font-bold text-accent mb-3">No Separate Request Needed</h2>
-          <p class="leading-relaxed">
-            Because we delete all associated data immediately when you delete your account, you do not need to send a separate data deletion request. Once your account is deleted, all your data is permanently removed from our servers.
-          </p>
-        </section>
-
-        <section>
-          <h2 class="text-xl font-bold text-accent mb-3">How to Delete Your Account</h2>
-          <p class="leading-relaxed mb-4">
-            To delete your account:
-          </p>
-          <ol class="list-decimal list-inside space-y-2 ml-2">
-            <li>Log in to your BuildOnBudget account</li>
-            <li>Go to <strong>Settings</strong> in the app</li>
-            <li>Click the <strong>Delete Account</strong> button</li>
-            <li>Confirm the deletion when prompted</li>
-          </ol>
-        </section>
-
-        <section>
-          <h2 class="text-xl font-bold text-accent mb-3">What Happens After Deletion</h2>
-          <p class="leading-relaxed">
-            Once you confirm account deletion, your account and all associated data are permanently and immediately removed from our servers. This action cannot be undone.
-          </p>
-        </section>
-
-        <section>
-          <h2 class="text-xl font-bold text-accent mb-3">Contact Us</h2>
-          <p class="leading-relaxed">
-            If you have any questions about deleting your data, contact us at support@buildonbudget.com.
-          </p>
-        </section>
-
-        <div class="pt-4">
-          <a href="/privacy" class="inline-flex items-center text-accent hover:underline">
-            &larr; Back to Privacy Policy
-          </a>
+    <nav class="absolute top-0 left-0 right-0 z-50 px-6 lg:px-12 py-6">
+      <div class="max-w-7xl mx-auto flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+          <img src="/images/logo.png" alt="Logo" class="w-12 h-12">
+          <span class="text-xl font-bold text-white tracking-wide">BUILDON<span class="text-purple-400">BUDGET</span></span>
+        </div>
+        <div class="hidden md:flex items-center space-x-8">
+          <a href="/" class="text-slate-300 hover:text-white transition font-medium">Home</a>
+          <a href="/demo" class="text-slate-300 hover:text-white transition font-medium">Demo</a>
+          <a href="/login" class="text-slate-300 hover:text-white transition font-medium">Login</a>
+          <a href="/signup" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-semibold transition btn-glow">Get Started</a>
         </div>
       </div>
-    </div>
-  </div>
+    </nav>
 
-  <footer class="bg-bg-secondary text-text-secondary py-4 mt-auto border-t border-border">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-      <p class="text-sm">&copy; <%= new Date().getFullYear() %> BuildOnBudget. All rights reserved.</p>
-      <div class="flex gap-6">
-        <a href="/terms" class="text-sm hover:text-accent transition">Terms of Service</a>
-        <a href="/privacy" class="text-sm hover:text-accent transition">Privacy Policy</a>
+    <div class="relative z-20 max-w-7xl mx-auto px-6 lg:px-12 py-32 w-full text-center">
+      <h1 class="text-4xl sm:text-5xl font-bold text-white mb-4">Delete Your Data</h1>
+      <p class="text-slate-400">How to remove your account and associated data</p>
+    </div>
+  </section>
+
+  <main class="flex-grow px-6 lg:px-12 py-16">
+    <div class="max-w-3xl mx-auto space-y-10">
+      <section class="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
+        <div class="flex items-center space-x-4 mb-4">
+          <div class="w-10 h-10 bg-red-600/20 rounded-lg flex items-center justify-center">
+            <i class="fas fa-trash-alt text-red-400"></i>
+          </div>
+          <h2 class="text-2xl font-bold text-white">How to Delete Your Data</h2>
+        </div>
+        <p class="text-slate-400 leading-relaxed mb-4">
+          Deleting your account is the only step needed to remove all your data from our servers. When you delete your account, we immediately remove:
+        </p>
+        <ul class="list-disc list-inside space-y-2 ml-2 text-slate-400">
+          <li>Your profile information</li>
+          <li>All your projects and project data</li>
+          <li>Budget information</li>
+          <li>Task lists</li>
+          <li>Any other data associated with your account</li>
+        </ul>
+      </section>
+
+      <section class="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
+        <div class="flex items-center space-x-4 mb-4">
+          <div class="w-10 h-10 bg-blue-600/20 rounded-lg flex items-center justify-center">
+            <i class="fas fa-check-circle text-blue-400"></i>
+          </div>
+          <h2 class="text-2xl font-bold text-white">No Separate Request Needed</h2>
+        </div>
+        <p class="text-slate-400 leading-relaxed">
+          Because we delete all associated data immediately when you delete your account, you do not need to send a separate data deletion request. Once your account is deleted, all your data is permanently removed from our servers.
+        </p>
+      </section>
+
+      <section class="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
+        <div class="flex items-center space-x-4 mb-4">
+          <div class="w-10 h-10 bg-purple-600/20 rounded-lg flex items-center justify-center">
+            <i class="fas fa-user-minus text-purple-400"></i>
+          </div>
+          <h2 class="text-2xl font-bold text-white">How to Delete Your Account</h2>
+        </div>
+        <p class="text-slate-400 leading-relaxed mb-4">
+          To delete your account:
+        </p>
+        <ol class="list-decimal list-inside space-y-2 ml-2 text-slate-400">
+          <li>Log in to your BuildOnBudget account</li>
+          <li>Go to <strong class="text-white">Settings</strong> in the app</li>
+          <li>Click the <strong class="text-white">Delete Account</strong> button</li>
+          <li>Confirm the deletion when prompted</li>
+        </ol>
+      </section>
+
+      <section class="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
+        <div class="flex items-center space-x-4 mb-4">
+          <div class="w-10 h-10 bg-yellow-600/20 rounded-lg flex items-center justify-center">
+            <i class="fas fa-exclamation-triangle text-yellow-400"></i>
+          </div>
+          <h2 class="text-2xl font-bold text-white">What Happens After Deletion</h2>
+        </div>
+        <p class="text-slate-400 leading-relaxed">
+          Once you confirm account deletion, your account and all associated data are permanently and immediately removed from our servers. This action cannot be undone.
+        </p>
+      </section>
+
+      <section class="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
+        <div class="flex items-center space-x-4 mb-4">
+          <div class="w-10 h-10 bg-pink-600/20 rounded-lg flex items-center justify-center">
+            <i class="fas fa-envelope text-pink-400"></i>
+          </div>
+          <h2 class="text-2xl font-bold text-white">Contact Us</h2>
+        </div>
+        <p class="text-slate-400 leading-relaxed">
+          If you have any questions about deleting your data, contact us at support@buildonbudget.com.
+        </p>
+      </section>
+
+      <div class="pt-4">
+        <a href="/privacy" class="inline-flex items-center text-purple-400 hover:text-purple-300 transition">
+          <i class="fas fa-arrow-left mr-2"></i>
+          Back to Privacy Policy
+        </a>
       </div>
     </div>
-  </footer>
+  </main>
+
+  <%- include('partials/footer') %>
+
 </body>
 
 </html>

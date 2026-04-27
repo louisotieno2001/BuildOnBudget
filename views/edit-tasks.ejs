@@ -1,133 +1,192 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en" class="scroll-smooth dark">
 
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Edit Task - BuildOnBudget</title>
     <link href="/output.css" rel="stylesheet" />
-    <link href="/toast.css" rel="stylesheet" />
     <link rel="shortcut icon" href="/images/logo.png" type="image/x-icon">
-    <script defer src="/javascript/index.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Oswald:wght@200..700&family=Plus+Jakarta+Sans:wght@200..800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --font-heading: 'Oswald', sans-serif;
+            --font-body: 'Plus Jakarta Sans', sans-serif;
+        }
+        body {
+            font-family: var(--font-body);
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-heading);
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+        .hero-gradient {
+            background: linear-gradient(135deg, #1e1b4b 0%, #4c1d95 50%, #312e81 100%);
+        }
+        .hero-pattern {
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        .card-modern {
+            @apply bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 rounded-3xl shadow-2xl;
+        }
+        .input-modern {
+            @apply w-full bg-slate-900/50 border border-slate-700 text-white px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all placeholder:text-slate-500;
+        }
+        .label-modern {
+            @apply block mb-2 text-xs font-black uppercase tracking-widest text-slate-400 ml-1;
+        }
+        .btn-glow:hover {
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+        }
+    </style>
 </head>
 
-<body class="w-full bg-bg-primary text-text-primary min-h-screen flex flex-col">
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
     <div id="toast-container"></div>
-    <div class="w-full bg-bg-primary text-text-primary min-h-screen flex flex-col items-center justify-center">
-        <!-- Main (Centered Form) -->
-        <main class="w-full flex-grow flex items-center justify-center px-4 py-12 min-h-screen">
-            <div class="w-full max-w-2xl bg-bg-primary dark:bg-bg-primary p-8 rounded-lg animate-fadeInUp shadow-md">
-                <h2 class="text-3xl font-extrabold mb-6 text-center text-gradient">Edit Task</h2>
-                <form id="edit-task-form" class="space-y-6">
+    
+    <!-- Background Elements -->
+    <div class="fixed inset-0 z-0 hero-gradient hero-pattern opacity-40"></div>
+    <div class="fixed inset-0 z-0">
+        <div class="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(76,29,149,0.1),transparent)]"></div>
+    </div>
 
-                    <!-- Select Project -->
-                    <div>
-                        <label for="project_id" class="block mb-1 font-medium">Select Project</label>
-                        <select id="project_id" name="project_id" required
-                            class="w-full border border-border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent">
-                            <option value="">-- Select Project --</option>
-                            <% projects.forEach(project => { %>
-                                <option value="<%= project.id %>" <%= project.id == task.project_id ? 'selected' : '' %>><%= project.name %></option>
+    <!-- Main Content -->
+    <main class="relative z-10 flex-grow flex items-center justify-center px-4 py-20">
+        <div class="w-full max-w-2xl card-modern p-8 md:p-12">
+            <!-- Header Section -->
+            <div class="text-center mb-10">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-purple-500/20 rounded-2xl mb-6 text-purple-400 text-3xl">
+                    <i class="fas fa-list-check"></i>
+                </div>
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-3">Refine Task Details</h2>
+                <p class="text-slate-400 max-w-md mx-auto">Update the operational parameters for this construction milestone.</p>
+            </div>
+
+            <form id="edit-task-form" class="space-y-8">
+                <!-- Project Selection -->
+                <div>
+                    <label for="project_id" class="label-modern">Assigned Project</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
+                            <i class="fas fa-folder-tree"></i>
+                        </span>
+                        <select id="project_id" name="project_id" required class="input-modern pl-12 appearance-none">
+                            <option value="" class="bg-slate-900">-- Select Project --</option>
+                            <% projects.forEach(project=> { %>
+                                <option value="<%= project.id %>" <%=project.id==task.project_id ? 'selected' : '' %> class="bg-slate-900">
+                                    <%= project.name %>
+                                </option>
                             <% }) %>
                         </select>
                     </div>
+                </div>
 
-                    <!-- Task Name -->
-                    <div>
-                        <label for="name" class="block mb-1 font-medium">Task Name</label>
-                        <input type="text" id="name" name="name" required
-                            class="w-full border border-border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
+                <!-- Task Identity -->
+                <div>
+                    <label for="name" class="label-modern">Task Name</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
+                            <i class="fas fa-thumbtack"></i>
+                        </span>
+                        <input type="text" id="name" name="name" required class="input-modern pl-12"
                             placeholder="e.g., Foundation Excavation" value="<%= task.name %>" />
                     </div>
+                </div>
 
-                    <!-- Task Description -->
+                <!-- Description -->
+                <div>
+                    <label for="description" class="label-modern">Scope Details</label>
+                    <textarea id="description" name="description" rows="3" class="input-modern resize-none"
+                        placeholder="Detailed description of the task..."><%= task.description || '' %></textarea>
+                </div>
+
+                <!-- Workforce & Meta -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label for="description" class="block mb-1 font-medium">Task Description</label>
-                        <textarea id="description" name="description" rows="3"
-                            class="w-full border border-border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
-                            placeholder="Detailed description of the task..."><%= task.description || '' %></textarea>
-                    </div>
-
-                    <!-- Assigned To -->
-                    <div>
-                        <label for="assigned_to" class="block mb-1 font-medium">Assigned To</label>
-                        <input type="text" id="assigned_to" name="assigned_to"
-                            class="w-full border border-border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
-                            placeholder="Name or team member" value="<%= task.assigned_to || '' %>" />
-                    </div>
-
-                    <!-- Priority -->
-                    <div>
-                        <label for="priority" class="block mb-1 font-medium">Priority</label>
-                        <select id="priority" name="priority"
-                            class="w-full border border-border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent">
-                            <option value="low" <%= task.priority == 'low' ? 'selected' : '' %>>Low</option>
-                            <option value="medium" <%= task.priority == 'medium' ? 'selected' : '' %>>Medium</option>
-                            <option value="high" <%= task.priority == 'high' ? 'selected' : '' %>>High</option>
-                        </select>
-                    </div>
-
-                    <!-- Status -->
-                    <div>
-                        <label for="status" class="block mb-1 font-medium">Status</label>
-                        <select id="status" name="status"
-                            class="w-full border border-border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent">
-                            <option value="pending" <%= task.status == 'pending' ? 'selected' : '' %>>Pending</option>
-                            <option value="in_progress" <%= task.status == 'in_progress' ? 'selected' : '' %>>In Progress</option>
-                            <option value="completed" <%= task.status == 'completed' ? 'selected' : '' %>>Completed</option>
-                        </select>
-                    </div>
-
-                    <!-- Timeline -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label for="start_date" class="block mb-1 font-medium">Start Date</label>
-                            <input type="date" id="start_date" name="start_date"
-                                class="w-full border border-border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
-                                value="<%= task.start_date ? new Date(task.start_date).toISOString().split('T')[0] : '' %>" />
-                        </div>
-                        <div>
-                            <label for="end_date" class="block mb-1 font-medium">End Date</label>
-                            <input type="date" id="end_date" name="end_date"
-                                class="w-full border border-border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
-                                value="<%= task.end_date ? new Date(task.end_date).toISOString().split('T')[0] : '' %>" />
+                        <label for="assigned_to" class="label-modern">Assigned Lead</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
+                                <i class="fas fa-user-gear"></i>
+                            </span>
+                            <input type="text" id="assigned_to" name="assigned_to" class="input-modern pl-12"
+                                placeholder="Name or specialist" value="<%= task.assigned_to || '' %>" />
                         </div>
                     </div>
+                    <div>
+                        <label for="priority" class="label-modern">Criticality Level</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
+                                <i class="fas fa-bolt-lightning"></i>
+                            </span>
+                            <select id="priority" name="priority" class="input-modern pl-12 appearance-none">
+                                <option value="low" <%=task.priority=='low' ? 'selected' : '' %> class="bg-slate-900">Low Priority</option>
+                                <option value="medium" <%=task.priority=='medium' ? 'selected' : '' %> class="bg-slate-900">Medium Priority</option>
+                                <option value="high" <%=task.priority=='high' ? 'selected' : '' %> class="bg-slate-900">High Priority</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
 
-                    <!-- Submit Button -->
-                    <button type="submit" id="update-task-button"
-                        class="w-full bg-accent text-text-primary py-2 rounded-md font-semibold hover:bg-accent/90 transition cursor-pointer">
-                        Update Task
+                <!-- Status & Timing -->
+                <div>
+                    <label for="status" class="label-modern">Execution Status</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
+                            <i class="fas fa-spinner"></i>
+                        </span>
+                        <select id="status" name="status" class="input-modern pl-12 appearance-none">
+                            <option value="pending" <%=task.status=='pending' ? 'selected' : '' %> class="bg-slate-900">⏳ Pending Initialization</option>
+                            <option value="in_progress" <%=task.status=='in_progress' ? 'selected' : '' %> class="bg-slate-900">🏗️ In Progress</option>
+                            <option value="completed" <%=task.status=='completed' ? 'selected' : '' %> class="bg-slate-900">✅ Mission Complete</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                    <div>
+                        <label for="start_date" class="label-modern">Commencement Date</label>
+                        <input type="date" id="start_date" name="start_date" class="input-modern"
+                            value="<%= task.start_date ? new Date(task.start_date).toISOString().split('T')[0] : '' %>" />
+                    </div>
+                    <div>
+                        <label for="end_date" class="label-modern">Target Completion</label>
+                        <input type="date" id="end_date" name="end_date" class="input-modern"
+                            value="<%= task.end_date ? new Date(task.end_date).toISOString().split('T')[0] : '' %>" />
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="pt-10 flex flex-col gap-4">
+                    <button type="submit" id="update-task-button" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-4 rounded-2xl font-bold text-lg transition-all btn-glow shadow-xl shadow-purple-600/20 flex items-center justify-center space-x-3">
+                        <i class="fas fa-floppy-disk"></i>
+                        <span>Sync Changes</span>
                     </button>
-                </form>
+                    <a href="/dashboard" class="w-full px-10 py-4 rounded-2xl font-bold text-slate-400 hover:text-white hover:bg-slate-800 transition text-center">
+                        Discard & Back
+                    </a>
+                </div>
+            </form>
+        </div>
+    </main>
 
-                <!-- Back link -->
-                <p class="mt-6 text-center text-sm text-gray-500">
-                    <a href="/dashboard" class="text-accent font-medium hover:underline">Back to Dashboard</a>
-                </p>
-            </div>
-        </main>
-    </div>
-    <footer class="bg-bg-secondary text-text-secondary py-4 mt-auto border-t border-border">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-      <p class="text-sm">&copy; <%= new Date().getFullYear() %> BuildOnBudget. All rights reserved.</p>
-      <div class="flex gap-6">
-        <a href="/terms" class="text-sm hover:text-accent transition">Terms of Service</a>
-        <a href="/privacy" class="text-sm hover:text-accent transition">Privacy Policy</a>
-      </div>
-    </div>
-  </footer>
+    <%- include('partials/footer') %>
+
     <script src="/javascript/toast.js"></script>
     <script>
-        document.getElementById('edit-task-form').addEventListener('submit', async function(e) {
+        document.getElementById('edit-task-form').addEventListener('submit', async function (e) {
             e.preventDefault();
             const formData = new FormData(this);
             const data = Object.fromEntries(formData);
             const taskId = '<%= task.id %>';
 
             const button = document.getElementById('update-task-button');
+            const originalContent = button.innerHTML;
             button.disabled = true;
-            button.textContent = 'Updating...';
+            button.innerHTML = '<i class="fas fa-circle-notch animate-spin"></i> <span>Updating...</span>';
 
             try {
                 const response = await fetch(`/edit-task/${taskId}`, {
@@ -145,13 +204,13 @@
                 } else {
                     showToast(result.error || 'Error updating task', 'error');
                     button.disabled = false;
-                    button.textContent = 'Update Task';
+                    button.innerHTML = originalContent;
                 }
             } catch (error) {
                 console.error('Error:', error);
                 showToast('An error occurred', 'error');
                 button.disabled = false;
-                button.textContent = 'Update Task';
+                button.innerHTML = originalContent;
             }
         });
     </script>

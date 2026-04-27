@@ -46,6 +46,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const attachment = document.getElementById('attachments').files[0];
         if (attachment) {
+            const maxSize = 50 * 1024 * 1024; // 50MB
+            if (attachment.size > maxSize) {
+                showToast(`File is too large. Maximum allowed size is 50MB. Your file is ${(attachment.size / (1024 * 1024)).toFixed(1)}MB`, 'error');
+                return;
+            }
             payload.attachment_name = attachment.name;
             payload.attachment_type = attachment.type || 'application/octet-stream';
             const dataUrl = await new Promise((resolve, reject) => {

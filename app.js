@@ -402,8 +402,8 @@ const upload = multer({
             cb(null, `${Date.now()}-${safeName}`);
         }
     }),
-    limits: { 
-        fileSize: 5 * 1024 * 1024 * 1024, // 5GB
+    limits: {
+        fileSize: 50 * 1024 * 1024, // 50MB
         fieldSize: 50 * 1024 * 1024 // 50MB for form fields
     },
 });
@@ -426,7 +426,7 @@ app.post('/new-project', checkSession, upload.single('attachment'), async (req, 
     if (req.fileValidationError) {
         console.error('Multer validation error:', req.fileValidationError);
         console.log('=== NEW-PROJECT DEBUG END (MULTER ERROR) ===');
-        return res.status(400).json({ error: 'File too large or invalid: ' + req.fileValidationError.message });
+        return res.status(400).json({ error: 'File too large or invalid. Maximum allowed size is 50MB: ' + req.fileValidationError.message });
     }
     const {
         name,

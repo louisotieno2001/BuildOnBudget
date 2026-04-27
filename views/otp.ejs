@@ -4,38 +4,95 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>OTP Verification - BuildOnBudget</title>
-  <link rel="shortcut icon" href="/images/logo.png" type="image/x-icon">
   <link href="/output.css" rel="stylesheet" />
+  <link href="/styles.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Oswald:wght@200..700&family=Plus+Jakarta+Sans:wght@200..800&display=swap" rel="stylesheet">
+  <link rel="shortcut icon" href="/images/logo.png" type="image">
   <script defer src="/javascript/index.js"></script>
+  <style>
+    :root {
+      --font-heading: 'Oswald', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+      --font-accent: 'DM Sans', sans-serif;
+    }
+    body {
+      font-family: var(--font-body);
+    }
+    h1, h2, h3, h4, h5, h6 {
+      font-family: var(--font-heading);
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+    .hero-gradient {
+      background: linear-gradient(135deg, #1e1b4b 0%, #4c1d95 50%, #312e81 100%);
+    }
+    .hero-pattern {
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .glow-effect {
+      box-shadow: 0 0 60px rgba(139, 92, 246, 0.3);
+    }
+    .btn-glow:hover {
+      box-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
+    }
+  </style>
 </head>
-<body class="bg-bg-primary text-text-primary min-h-screen flex flex-col">
-  <main class="flex-grow container mx-auto px-4 py-12 max-w-md">
-    <div class="card animate-fadeInUp">
-      <h2 class="text-3xl font-extrabold mb-6 text-center text-gradient">Verify your account</h2>
-      <p class="text-text-secondary text-center mb-8">
-        We've sent a 6-digit code to your email. Please enter it below to verify your account.
-      </p>
-      <form id="otp-form" class="space-y-6" method="POST" action="/otp">
-        <div>
-          <label for="otp" class="block mb-1 font-medium">OTP Code</label>
-          <input type="text" id="otp" name="otp" required class="input-field text-center text-2xl tracking-widest" placeholder="000000" maxlength="6" pattern="[0-9]{6}" />
-        </div>
-        <button type="submit" class="btn-primary w-full">Verify</button>
-      </form>
-      <div class="text-center mt-4">
-        <button id="resend-otp" class="text-accent hover:text-accent-hover text-sm transition-colors">Didn't receive the code? Resend</button>
-      </div>
-    </div>
-  </main>
 
-  <footer class="bg-bg-secondary text-text-secondary py-4 mt-auto border-t border-border">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-      <p class="text-sm">&copy; <%= new Date().getFullYear() %> BuildOnBudget. All rights reserved.</p>
-      <div class="flex gap-6">
-        <a href="/terms" class="text-sm hover:text-accent transition">Terms of Service</a>
-        <a href="/privacy" class="text-sm hover:text-accent transition">Privacy Policy</a>
+<body class="bg-bg-primary text-text-primary min-h-screen flex flex-col font-body">
+  <section class="relative min-h-screen hero-gradient hero-pattern flex items-center">
+    <div class="absolute inset-0 overflow-hidden">
+      <div class="absolute top-20 left-10 w-72 h-72 bg-purple-500/20 rounded-full blur-3xl"></div>
+      <div class="absolute bottom-20 right-10 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl"></div>
+    </div>
+
+    <nav class="absolute top-0 left-0 right-0 z-50 px-6 lg:px-12 py-6">
+      <div class="max-w-7xl mx-auto flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+          <img src="/images/logo.png" alt="Logo" class="w-12 h-12">
+          <span class="text-xl font-bold text-white tracking-wide">BUILDON<span class="text-purple-400">BUDGET</span></span>
+        </div>
+        <div class="hidden md:flex items-center space-x-8">
+          <a href="/" class="text-slate-300 hover:text-white transition font-medium">Home</a>
+          <a href="/demo" class="text-slate-300 hover:text-white transition font-medium">Demo</a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="relative z-20 max-w-7xl mx-auto px-6 lg:px-12 py-32 w-full flex items-center justify-center min-h-screen">
+      <div class="w-full max-w-md">
+        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/10 glow-effect">
+          <div class="text-center mb-8">
+            <div class="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-shield-alt text-white text-2xl"></i>
+            </div>
+            <h2 class="text-3xl font-bold text-white">Verify Your Account</h2>
+            <p class="text-slate-300 mt-2">We've sent a 6-digit code to your email. Please enter it below to verify your account.</p>
+          </div>
+
+          <form id="otp-form" class="space-y-6" method="POST" action="/otp">
+            <div>
+              <label for="otp" class="block mb-2 font-medium text-slate-300">OTP Code</label>
+              <input type="text" id="otp" name="otp" required 
+                class="w-full bg-white/10 border border-white/20 px-4 py-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-white text-center text-2xl tracking-widest placeholder-slate-500" 
+                placeholder="000000" maxlength="6" pattern="[0-9]{6}" />
+            </div>
+
+            <button type="submit" class="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition btn-glow cursor-pointer">
+              <i class="fas fa-check-circle mr-2"></i>Verify
+            </button>
+          </form>
+
+          <div class="text-center mt-6">
+            <button id="resend-otp" class="text-purple-400 hover:text-purple-300 transition text-sm">
+              <i class="fas fa-redo mr-2"></i>Didn't receive the code? Resend
+            </button>
+          </div>
+        </div>
       </div>
     </div>
-  </footer>
+  </section>
 </body>
 </html>

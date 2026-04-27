@@ -1,13 +1,12 @@
 // Theme toggle functionality
 class ThemeManager {
   constructor() {
-    this.theme = localStorage.getItem('theme') || 'light';
+    this.theme = localStorage.getItem('theme') || 'dark';
     this.init();
   }
 
   init() {
     this.applyTheme();
-    this.createThemeToggle();
     this.bindEvents();
   }
 
@@ -20,92 +19,18 @@ class ThemeManager {
     }
   }
 
-  createThemeToggle() {
-    const toggleButton = document.createElement('button');
-    toggleButton.id = 'theme-toggle';
-    toggleButton.title = 'Move this icon';
-    toggleButton.className =
-      'fixed top-4 right-4 z-50 p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200 cursor-move';
-    toggleButton.innerHTML = `
-      <svg class="w-5 h-5 text-gray-800 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
-      </svg>
-    `;
-
-    // Append to body
-    document.body.appendChild(toggleButton);
-
-    // Make draggable (with safe click detection)
-    this.makeDraggable(toggleButton);
-  }
-
   toggleTheme() {
     this.theme = this.theme === 'light' ? 'dark' : 'light';
     localStorage.setItem('theme', this.theme);
     this.applyTheme();
-    this.updateToggleIcon();
-  }
-
-  updateToggleIcon() {
-    const icon = document.querySelector('#theme-toggle svg');
-    if (this.theme === 'dark') {
-      icon.innerHTML = `
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
-      `;
-    } else {
-      icon.innerHTML = `
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
-      `;
-    }
   }
 
   bindEvents() {
-    // Listen for system theme changes
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
       if (!localStorage.getItem('theme')) {
         this.theme = e.matches ? 'dark' : 'light';
         this.applyTheme();
-        this.updateToggleIcon();
       }
-    });
-  }
-
-  makeDraggable(el) {
-    let isDragging = false;
-    let moved = false;
-    let offsetX, offsetY;
-
-    el.addEventListener('mousedown', (e) => {
-      isDragging = true;
-      moved = false;
-      offsetX = e.clientX - el.getBoundingClientRect().left;
-      offsetY = e.clientY - el.getBoundingClientRect().top;
-
-      const move = (e) => {
-        if (!isDragging) return;
-        moved = true;
-        el.style.left = `${e.clientX - offsetX}px`;
-        el.style.top = `${e.clientY - offsetY}px`;
-        el.style.right = 'auto';
-        el.style.bottom = 'auto';
-        el.style.position = 'fixed';
-      };
-
-      const stop = () => {
-        if (isDragging && !moved) {
-          // Only toggle if no drag occurred
-          this.toggleTheme();
-        }
-        isDragging = false;
-        document.removeEventListener('mousemove', move);
-        document.removeEventListener('mouseup', stop);
-      };
-
-      document.addEventListener('mousemove', move);
-      document.addEventListener('mouseup', stop);
     });
   }
 }

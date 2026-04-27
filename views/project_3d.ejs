@@ -1,113 +1,249 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en" class="scroll-smooth dark">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>3D Viewer - <%= project.name %> - BuildOnBudget</title>
+  <title>3D Architecture - <%= project.name %> - BuildOnBudget</title>
   <link href="/output.css" rel="stylesheet" />
+  <link rel="shortcut icon" href="/images/logo.png" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Oswald:wght@200..700&family=Plus+Jakarta+Sans:wght@200..800&display=swap" rel="stylesheet">
+  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r161/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.161.0/examples/js/loaders/GLTFLoader.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.161.0/examples/js/controls/OrbitControls.js"></script>
-  <link rel="shortcut icon" href="/images/logo.png" type="image/x-icon">
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  <style>
+    :root {
+      --font-heading: 'Oswald', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+    body {
+      font-family: var(--font-body);
+    }
+    h1, h2, h3, h4, h5, h6 {
+      font-family: var(--font-heading);
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+    .hero-gradient {
+      background: linear-gradient(135deg, #1e1b4b 0%, #4c1d95 50%, #312e81 100%);
+    }
+    .card-modern {
+      @apply bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-3xl shadow-2xl;
+    }
+    .btn-glow:hover {
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+    }
+    #viewer-container canvas {
+      @apply rounded-2xl;
+    }
+    .viewer-overlay {
+      background: linear-gradient(to top, rgba(15, 23, 42, 0.8), transparent);
+    }
+  </style>
 </head>
 
-<body x-data="{ sidebarOpen: false, profileOpen: false }"
-  class="bg-bg-primary text-text-primary min-h-screen flex flex-col">
+<body x-data="{ sidebarOpen: false }" class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+  <div id="toast-container"></div>
 
-  <div class="flex flex-1">
-    <main class="flex-1 ml-0 md:ml-0 p-4 md:p-8 transition-all">
-      <div class="bg-bg-primary p-4 md:p-6 rounded-xl">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 md:mb-6 gap-4">
-          <a href="/projects/<%= project.id %>" class="bg-purple-600 text-white px-3 md:px-4 py-2 rounded-lg hover:bg-purple-700 transition text-sm md:text-base flex items-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to Project Details
-          </a>
-          <h2 class="text-2xl md:text-3xl font-extrabold text-purple-700">3D Visualization - <%= project.name %></h2>
-        </div>
-
-        <div id="viewer-container" style="height: 60vh; width: 100%; position: relative; background: #f0f0f0; border-radius: 0.75rem; overflow: hidden;"></div>
-
-        <div class="mt-6 space-y-4">
-          <div class="bg-bg-secondary p-4 rounded-lg shadow-sm">
-            <h3 class="text-lg font-semibold mb-2">Status: <span id="status">Loading...</span> <span id="progress" class="ml-2"></span></h3>
-            <div class="w-full bg-gray-200 rounded-full h-2.5">
-              <div id="progress-bar" class="bg-purple-600 h-2.5 rounded-full transition-all" style="width: 0%"></div>
-            </div>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <form id="upload-form" enctype="multipart/form-data" class="bg-bg-secondary p-4 rounded-lg shadow-sm">
-              <h3 class="text-lg font-semibold mb-2">Upload BOQ / Plans</h3>
-              <input type="file" id="docs-upload" multiple accept=".pdf,image/*,.dwg" class="w-full p-2 border border-gray-300 rounded-lg mb-2">
-              <button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 w-full">Upload Docs</button>
-            </form>
-            <div class="bg-bg-secondary p-4 rounded-lg shadow-sm">
-              <button id="refresh-btn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 w-full mb-2">Refresh Model</button>
-              <button id="reset-btn" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 w-full">Reset View</button>
-            </div>
-          </div>
-        </div>
+  <!-- Header -->
+  <header class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
+    <div class="flex justify-between items-center px-4 py-4 md:px-8 max-w-[1600px] mx-auto">
+      <div class="flex items-center space-x-4">
+        <a href="/dashboard/<%= project.id %>" class="text-slate-400 hover:text-white transition-all flex items-center space-x-2 bg-slate-800/50 px-4 py-2 rounded-xl border border-slate-700/50">
+          <i class="fas fa-arrow-left text-xs"></i>
+          <span class="text-sm font-bold uppercase tracking-wider hidden sm:block">Exit Viewer</span>
+        </a>
       </div>
-    </main>
-  </div>
-
-  <footer class="bg-bg-secondary text-text-secondary py-4 mt-auto border-t border-border">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-      <p class="text-sm">&copy; <%= new Date().getFullYear() %> BuildOnBudget. All rights reserved.</p>
-      <div class="flex gap-6">
-        <a href="/terms" class="text-sm hover:text-accent transition">Terms of Service</a>
-        <a href="/privacy" class="text-sm hover:text-accent transition">Privacy Policy</a>
+      <div class="flex items-center space-x-3">
+        <img src="/images/logo.png" alt="Logo" class="w-8 h-8">
+        <span class="text-lg font-bold text-white tracking-tight">BUILDON<span class="text-purple-400">BUDGET</span></span>
+      </div>
+      <div class="w-24 sm:w-32 flex justify-end">
+         <span class="text-[10px] font-black uppercase tracking-widest text-purple-400 bg-purple-500/10 px-3 py-1 rounded-full">3D Mode</span>
       </div>
     </div>
-  </footer>
+  </header>
+
+  <main class="flex-grow p-4 md:p-8 max-w-[1600px] mx-auto w-full">
+    <div class="grid lg:grid-cols-3 gap-8">
+      
+      <!-- Left Column: 3D Workspace -->
+      <div class="lg:col-span-2 space-y-6">
+        <div class="card-modern relative overflow-hidden group">
+          <div class="p-6 border-b border-slate-700/50 flex justify-between items-center">
+            <div>
+              <h2 class="text-2xl font-bold text-white tracking-wide"><%= project.name %></h2>
+              <p class="text-xs text-slate-500 font-bold uppercase tracking-widest">Architectural Visualization</p>
+            </div>
+            <div class="flex space-x-2">
+              <button id="reset-btn" class="p-2.5 bg-slate-700/50 hover:bg-slate-700 text-white rounded-xl transition" title="Reset View">
+                <i class="fas fa-arrows-rotate"></i>
+              </button>
+              <button id="refresh-btn" class="p-2.5 bg-slate-700/50 hover:bg-purple-600 text-white rounded-xl transition" title="Force Refresh">
+                <i class="fas fa-sync-alt"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Viewer Container -->
+          <div id="viewer-container" class="relative aspect-video w-full bg-slate-950 flex items-center justify-center">
+             <!-- Overlay Controls -->
+             <div class="absolute bottom-6 left-6 right-6 viewer-overlay p-4 rounded-2xl flex items-center justify-between pointer-events-none">
+                <div class="flex items-center space-x-4">
+                  <div class="flex items-center space-x-2 text-xs font-bold text-slate-300">
+                    <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                    <span id="status-badge" class="uppercase tracking-widest">Ready</span>
+                  </div>
+                </div>
+                <div class="flex items-center space-x-6 text-[10px] font-black text-slate-500 uppercase tracking-tighter">
+                   <span class="flex items-center"><i class="fas fa-mouse mr-2"></i> Rotate</span>
+                   <span class="flex items-center"><i class="fas fa-mouse-pointer mr-2"></i> Pan</span>
+                   <span class="flex items-center"><i class="fas fa-arrows-up-down mr-2"></i> Zoom</span>
+                </div>
+             </div>
+          </div>
+        </div>
+
+        <!-- Generation Progress -->
+        <div class="card-modern p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-black uppercase tracking-widest text-slate-400">Rendering Engine Status</h3>
+            <span id="progress-text" class="text-xs font-bold text-purple-400">0%</span>
+          </div>
+          <div class="w-full bg-slate-900 rounded-full h-3 p-0.5 border border-slate-700/50 overflow-hidden">
+            <div id="progress-bar" class="bg-gradient-to-r from-purple-600 to-pink-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+          <div class="mt-4 flex items-center text-xs text-slate-500 italic">
+            <i class="fas fa-info-circle mr-2"></i>
+            <span id="status-detail">Ready to process architectural documents.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Document Control -->
+      <div class="space-y-6">
+        <div class="card-modern p-8">
+          <h3 class="text-xl font-bold text-white mb-6 flex items-center">
+            <i class="fas fa-cloud-arrow-up text-purple-500 mr-3"></i> Blueprint Intake
+          </h3>
+          <p class="text-slate-400 text-sm mb-8 leading-relaxed">
+            Upload your BOQ, floor plans, or site photos. Our engine will process these to refine the 3D representation.
+          </p>
+          
+          <form id="upload-form" enctype="multipart/form-data" class="space-y-6">
+            <div class="relative group">
+              <div class="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-slate-700 rounded-2xl bg-slate-900/30 group-hover:border-purple-500/50 transition-colors">
+                <i class="fas fa-file-pdf text-3xl text-slate-600 group-hover:text-purple-400 mb-3 transition-colors"></i>
+                <p class="text-[10px] text-slate-500 uppercase font-black tracking-widest">Select Technical Docs</p>
+                <input type="file" id="docs-upload" multiple accept=".pdf,image/*,.dwg" class="absolute inset-0 opacity-0 cursor-pointer">
+              </div>
+            </div>
+            
+            <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-4 rounded-xl font-bold transition btn-glow flex items-center justify-center space-x-3">
+              <i class="fas fa-wand-magic-sparkles"></i>
+              <span>Process Documents</span>
+            </button>
+          </form>
+        </div>
+
+        <div class="card-modern p-8">
+           <h4 class="text-xs font-black uppercase tracking-widest text-slate-500 mb-4">Viewer Settings</h4>
+           <div class="space-y-4">
+             <div class="flex items-center justify-between p-3 bg-slate-900/50 rounded-xl border border-slate-700/30">
+               <span class="text-sm font-medium text-slate-300">Ambient Occlusion</span>
+               <div class="w-10 h-5 bg-purple-600 rounded-full flex items-center px-1">
+                 <div class="w-3 h-3 bg-white rounded-full ml-auto"></div>
+               </div>
+             </div>
+             <div class="flex items-center justify-between p-3 bg-slate-900/50 rounded-xl border border-slate-700/30">
+               <span class="text-sm font-medium text-slate-300">Shadow Maps</span>
+               <div class="w-10 h-5 bg-slate-700 rounded-full flex items-center px-1">
+                 <div class="w-3 h-3 bg-white rounded-full"></div>
+               </div>
+             </div>
+           </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <%- include('partials/footer') %>
 
   <script>
     const projectId = '<%= project.id %>';
     let scene, camera, renderer, controls, loader;
     let modelUrl = null;
-    let status = 'idle';
+    let currentContainer = null;
 
     function init3D() {
-      const container = document.getElementById('viewer-container');
+      currentContainer = document.getElementById('viewer-container');
       scene = new THREE.Scene();
-      scene.background = new THREE.Color(0xf0f8ff);
+      scene.background = new THREE.Color(0x0f172a); // Slate-900
 
-      camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-      camera.position.set(5, 5, 5);
+      camera = new THREE.PerspectiveCamera(75, currentContainer.clientWidth / currentContainer.clientHeight, 0.1, 1000);
+      camera.position.set(8, 8, 8);
 
-      renderer = new THREE.WebGLRenderer({ antialias: true });
-      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(currentContainer.clientWidth, currentContainer.clientHeight);
+      renderer.setPixelRatio(window.devicePixelRatio);
       renderer.shadowMap.enabled = true;
-      container.appendChild(renderer.domElement);
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      currentContainer.appendChild(renderer.domElement);
 
       // Lights
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
       scene.add(ambientLight);
+      
+      const pointLight = new THREE.PointLight(0x8b5cf6, 2, 100);
+      pointLight.position.set(10, 10, 10);
+      pointLight.castShadow = true;
+      scene.add(pointLight);
+
       const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-      directionalLight.position.set(10, 10, 5);
+      directionalLight.position.set(-5, 10, 5);
+      directionalLight.castShadow = true;
       scene.add(directionalLight);
 
-      // Dummy house
+      // Placeholder Modern House
       const houseGroup = new THREE.Group();
-      const bodyGeometry = new THREE.BoxGeometry(4, 2, 4);
-      const bodyMaterial = new THREE.MeshLambertMaterial({ color: 0xffa500 });
-      const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+      const body = new THREE.Mesh(
+        new THREE.BoxGeometry(4, 2, 4),
+        new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.2, metalness: 0.1 })
+      );
+      body.castShadow = true;
+      body.receiveShadow = true;
       houseGroup.add(body);
 
-      const roofGeometry = new THREE.ConeGeometry(3, 2, 4);
-      const roofMaterial = new THREE.MeshLambertMaterial({ color: 0xff0000 });
-      const roof = new THREE.Mesh(roofGeometry, roofMaterial);
+      const roof = new THREE.Mesh(
+        new THREE.ConeGeometry(3.5, 2, 4),
+        new THREE.MeshStandardMaterial({ color: 0x4c1d95, roughness: 0.5 })
+      );
       roof.position.y = 2;
+      roof.rotation.y = Math.PI / 4;
+      roof.castShadow = true;
       houseGroup.add(roof);
+
+      const floor = new THREE.Mesh(
+        new THREE.PlaneGeometry(20, 20),
+        new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 })
+      );
+      floor.rotation.x = -Math.PI / 2;
+      floor.position.y = -1;
+      floor.receiveShadow = true;
+      scene.add(floor);
 
       scene.add(houseGroup);
 
       loader = new THREE.GLTFLoader();
       controls = new THREE.OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
 
       animate();
     }
@@ -119,31 +255,52 @@
     }
 
     function loadModel(url) {
+      document.getElementById('status-badge').textContent = 'Loading Model...';
       loader.load(url, (gltf) => {
         scene.clear();
-        // Add lights again
-        scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-        scene.add(new THREE.DirectionalLight(0xffffff, 0.8, new THREE.Vector3(10, 10, 5)));
+        // Re-add environment
+        scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+        const pl = new THREE.PointLight(0x8b5cf6, 2, 100);
+        pl.position.set(10, 10, 10);
+        scene.add(pl);
+        
         scene.add(gltf.scene);
-        gltf.scene.scale.set(0.5, 0.5, 0.5);
-        camera.position.set(5, 5, 5);
-      }, undefined, (err) => console.error('Load error', err));
+        
+        // Center model
+        const box = new THREE.Box3().setFromObject(gltf.scene);
+        const center = box.getCenter(new THREE.Vector3());
+        gltf.scene.position.sub(center);
+        
+        document.getElementById('status-badge').textContent = 'Ready';
+      }, undefined, (err) => {
+        console.error('Load error', err);
+        document.getElementById('status-badge').textContent = 'Error';
+      });
     }
 
     async function pollModel() {
       try {
         const res = await fetch(`/projects/${projectId}/3d-model`);
         const data = await res.json();
-        document.getElementById('status').textContent = data.status;
+        
+        const statusBadge = document.getElementById('status-badge');
+        const statusDetail = document.getElementById('status-detail');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+
+        statusBadge.textContent = data.status || 'Ready';
+        statusDetail.textContent = data.message || 'Rendering engine synchronized.';
+        
         const prog = data.progress || 0;
-        document.getElementById('progress').textContent = prog ? `(${prog}%)` : '';
-        document.getElementById('progress-bar').style.width = prog + '%';
+        progressText.textContent = prog + '%';
+        progressBar.style.width = prog + '%';
+
         if (data.modelUrl && data.modelUrl !== modelUrl) {
           modelUrl = data.modelUrl;
           loadModel(modelUrl);
         }
       } catch (err) {
-        document.getElementById('status').textContent = 'error';
+        console.error('Polling error', err);
       }
     }
 
@@ -151,14 +308,25 @@
       e.preventDefault();
       const formData = new FormData();
       const files = document.getElementById('docs-upload').files;
+      if (files.length === 0) return;
+
       for (let file of files) formData.append('docs', file);
-      document.getElementById('status').textContent = 'uploading';
-      await fetch(`/projects/${projectId}/docs`, { method: 'POST', body: formData });
-      document.getElementById('status').textContent = 'generating';
+      
+      document.getElementById('status-badge').textContent = 'Uploading...';
+      try {
+        await fetch(`/projects/${projectId}/docs`, { method: 'POST', body: formData });
+        document.getElementById('status-badge').textContent = 'Processing...';
+        pollModel();
+      } catch (err) {
+        document.getElementById('status-badge').textContent = 'Upload Failed';
+      }
     });
 
     document.getElementById('refresh-btn').onclick = pollModel;
-    window.pollModel = pollModel;
+    document.getElementById('reset-btn').onclick = () => {
+      controls.reset();
+      camera.position.set(8, 8, 8);
+    };
 
     window.addEventListener('load', () => {
       init3D();
@@ -167,9 +335,10 @@
     });
 
     window.addEventListener('resize', () => {
-      camera.aspect = container.clientWidth / container.clientHeight;
+      if (!currentContainer) return;
+      camera.aspect = currentContainer.clientWidth / currentContainer.clientHeight;
       camera.updateProjectionMatrix();
-      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.setSize(currentContainer.clientWidth, currentContainer.clientHeight);
     });
   </script>
 

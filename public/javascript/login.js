@@ -4,6 +4,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const setAuthToken = (window.utils && window.utils.setAuthToken) ? window.utils.setAuthToken : () => {};
   const loginForm = document.getElementById('login-form');
 
+  const passwordInput = document.getElementById('password');
+  const passwordToggle = document.getElementById('password-toggle');
+
+  passwordToggle.addEventListener('click', () => {
+    const type = passwordInput.type === 'password' ? 'text' : 'password';
+    passwordInput.type = type;
+    passwordToggle.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+  });
+
   loginForm.addEventListener('submit', async e => {
     e.preventDefault();
 
@@ -29,7 +38,6 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         showToast(result.message || 'Login successful!', 'success');
         setAuthToken(result.token);
-        // Redirect to dashboard or another page
         window.location.href = '/dashboard';
       }
     } catch (error) {
