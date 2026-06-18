@@ -17,7 +17,7 @@ const PORT = process.env.EXPRESS_PORT || 3000;
 const url = process.env.DIRECTUS_URL;
 const accessToken = process.env.DIRECTUS_TOKEN;
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret';
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '30d';
 const AUTH_COOKIE_NAME = 'auth_token';
 const DEFAULT_ALLOWED_ORIGINS = [
   'http://localhost:8081',
@@ -283,7 +283,7 @@ app.post('/signup', async (req, res) => {
                 httpOnly: true,
                 secure: isProd,
                 sameSite: isProd ? 'none' : 'lax',
-                maxAge: 7 * 24 * 60 * 60 * 1000,
+                maxAge: 30 * 24 * 60 * 60 * 1000,
             });
         }
 
@@ -358,7 +358,7 @@ app.post('/login', async(req, res) => {
             httpOnly: true,
             secure: isProd,
             sameSite: isProd ? 'none' : 'lax',
-            maxAge: 7 * 24 * 60 * 60 * 1000,
+            maxAge: 30 * 24 * 60 * 60 * 1000,
         });
         return res.status(200).json({ message: 'Login successful', token, redirect: '/dashboard'})
     } catch (error) {
